@@ -1,3 +1,2 @@
 # dietician-client-tracker
 A comprehensive desktop application for dietitians to manage patient records, appointments, and diet plans. Built with Python, PyQt5, and MongoDB.
-## Proje Başlangıcı - Diyetisyen Takip Sistemi
