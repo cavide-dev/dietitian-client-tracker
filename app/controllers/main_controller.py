@@ -307,7 +307,7 @@ class MainController(QMainWindow):
                 # If a key is missing, it returns an empty string instead of crashing.
                 self.txt_name.setText(client.get("full_name", ""))
                 self.txt_phone.setText(client.get("phone", ""))
-                self.txt_notes.setText(client.get("notes", ""))
+                self.txt_notes.setPlainText(client.get("notes", ""))
                 
                 # 3. Switch View
                 # Show the form page, now filled with the client's data.
