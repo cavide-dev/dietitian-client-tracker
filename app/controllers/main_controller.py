@@ -29,6 +29,25 @@ class MainController(QMainWindow):
         # 3. Initial Setup
         # Show the dashboard page by default on startup.
         self.stackedWidget.setCurrentWidget(self.page_dashboard)
+        # Load the table data
+        self.load_clients_table()
+
+        # --- 4. NAVIGATION BUTTONS (Menu Connections) ---
+        self.btn_dashboard.clicked.connect(lambda: self.stackedWidget.setCurrentWidget(self.page_dashboard))
+        self.btn_clients.clicked.connect(lambda: self.stackedWidget.setCurrentWidget(self.page_clients))
+        self.btn_diet_plans.clicked.connect(lambda: self.stackedWidget.setCurrentWidget(self.page_diet_plans))
+        self.btn_settings.clicked.connect(lambda: self.stackedWidget.setCurrentWidget(self.page_settings))
+
+        # --- 5. CLIENT OPERATIONS (Add/Delete/Cancel/Save) ---
+        #Add
+        self.btn_add_new.clicked.connect(lambda: self.stackedWidget.setCurrentWidget(self.page_add_client))
+        #Cancel
+        self.btn_cancel.clicked.connect(lambda: self.stackedWidget.setCurrentWidget(self.page_clients))
+        #Save
+        self.btn_save.clicked.connect(self.save_client)
+        #Delete
+        self.btn_delete.clicked.connect(self.delete_client)
+
         
     def load_clients_table(self):
         """
