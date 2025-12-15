@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QHeaderView, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QHeaderView, QMessageBox, QAbstractItemView
 from PyQt5.uic import loadUi
 from PyQt5.QtCore import Qt  
 from bson.objectid import ObjectId 
@@ -30,67 +30,54 @@ class MainController(QMainWindow):
         # Show the dashboard page by default on startup.
         self.stackedWidget.setCurrentWidget(self.page_dashboard)
         
-        # Populate the clients table with data from the database.
-        self.load_clients_table()
-
-        # --- NAVIGATION BUTTONS (Menu) ---
-        # lambda: Allows us to pass arguments to functions (switching pages).
-        self.btn_dashboard.clicked.connect(lambda: self.stackedWidget.setCurrentWidget(self.page_dashboard))
-        self.btn_clients.clicked.connect(lambda: self.stackedWidget.setCurrentWidget(self.page_clients))
-        self.btn_diet_plans.clicked.connect(lambda: self.stackedWidget.setCurrentWidget(self.page_diet_plans))
-        self.btn_settings.clicked.connect(lambda: self.stackedWidget.setCurrentWidget(self.page_settings))
-
-        # --- CLIENT MANAGEMENT BUTTONS ---
-        # Button to switch to the 'Add Client' form page.
-        self.btn_add_new.clicked.connect(lambda: self.stackedWidget.setCurrentWidget(self.page_add_client))
-        
-        # Cancel button returns the user to the client list without saving.
-        self.btn_cancel.clicked.connect(lambda: self.stackedWidget.setCurrentWidget(self.page_clients))
-        
-        # Save button triggers the data insertion logic.
-        self.btn_save.clicked.connect(self.save_client)
-
-        # Delete button triggers the client deletion logic.
-        self.btn_delete.clicked.connect(self.delete_client)
-
-    # --- CUSTOM FUNCTIONS ---
-
     def load_clients_table(self):
         """
-        Fetches client data from MongoDB and populates the QTableWidget.
-        Configures the table layout to stretch columns.
+        Fetches client data from MongoDB and configures the table 
+        for multi-selection and optimal layout.
         """
         if self.db is None:
             return
 
-        # Access the 'clients' collection in MongoDB
+        # 1. Fetch Data
         clients_collection = self.db['clients']
-        
-        # Retrieve all documents as a list
         all_clients = list(clients_collection.find())
         
-        # Configure Table Structure
+        # 2. Configure Table Layout
         self.tableWidget.setRowCount(len(all_clients))
         self.tableWidget.setColumnCount(3)
         self.tableWidget.setHorizontalHeaderLabels(["Full Name", "Phone", "Notes"])
         
-        # UX Improvement: Stretch columns to fill the available width automatically
+        # UX: Stretch columns to fill the window
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        
+        # 3. Configure Selection Mode (New Feature)
+        # SelectRows: Clicking a cell selects the entire row.
+        self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        # ExtendedSelection: Allows selecting multiple rows using Ctrl or Shift keys.
+        self.tableWidget.setSelectionMode(QAbstractItemView.ExtendedSelection)
 
-        # Populate Rows
+        # 4. Populate Table
         for row_index, client in enumerate(all_clients):
-            # Get data safely (use '-' if key is missing)
-            name_item = QTableWidgetItem(client.get("full_name", "-"))
-
+            # --- Column 0: Name & Hidden ID ---
+            name_value = client.get("full_name", "-")
+            name_item = QTableWidgetItem(name_value)
+            
+            # HIDDEN ID STRATEGY:
+            # We store the MongoDB '_id' inside the item data (UserRole).
+            # It is invisible to the user but accessible via code.
             client_id = str(client.get("_id"))
             name_item.setData(Qt.UserRole, client_id)
-
-            phone_item = QTableWidgetItem(client.get("phone", "-"))
-            note_item = QTableWidgetItem(client.get("notes", ""))
             
-            # Place items in the correct cells
             self.tableWidget.setItem(row_index, 0, name_item)
+            
+            # --- Column 1: Phone ---
+            phone_value = client.get("phone", "-")
+            phone_item = QTableWidgetItem(phone_value)
             self.tableWidget.setItem(row_index, 1, phone_item)
+            
+            # --- Column 2: Notes ---
+            note_value = client.get("notes", "")
+            note_item = QTableWidgetItem(note_value)
             self.tableWidget.setItem(row_index, 2, note_item)
 
     def save_client(self):
@@ -143,30 +130,54 @@ class MainController(QMainWindow):
                 QMessageBox.critical(self, "Error", f"Could not save client: {e}")
 
     def delete_client(self):
-        """Deletes the selected client based on the hidden ID."""
-        # 1. Check selection
-        current_row = self.tableWidget.currentRow()
-        if current_row < 0:
-            QMessageBox.warning(self, "Warning", "Please select a row to delete!")
+        """
+        Deletes selected client(s) from the database.
+        Supports BULK DELETE (Multiple selections).
+        """
+        # 1. Get Selected Rows
+        # Returns a list of indices for all selected rows.
+        selected_rows = self.tableWidget.selectionModel().selectedRows()
+        
+        if not selected_rows:
+            QMessageBox.warning(self, "Warning", "Please select at least one client to delete!")
             return
-            
+
         # 2. Confirmation Dialog
-        reply = QMessageBox.question(self, 'Confirm Delete', 
-                                    'Are you sure you want to delete this client?',
+        count = len(selected_rows)
+        message = f"Are you sure you want to delete {count} client(s)?"
+        
+        # Default button is set to 'No' for safety (Defensive Design).
+        reply = QMessageBox.question(self, 'Confirm Delete', message,
                                      QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         
         if reply == QMessageBox.No:
             return
 
-        # 3. Get Hidden ID
-        name_item = self.tableWidget.item(current_row, 0)
-        client_id_str = name_item.data(Qt.UserRole)
+        # 3. Harvest IDs
+        # Collects the hidden MongoDB IDs from the selected rows.
+        ids_to_delete = []
+        
+        for row_obj in selected_rows:
+            row_index = row_obj.row()
+            # Retrieve the item from the first column (where we hid the ID)
+            name_item = self.tableWidget.item(row_index, 0)
+            client_id_str = name_item.data(Qt.UserRole)
+            
+            if client_id_str:
+                # Convert String ID back to MongoDB ObjectId
+                ids_to_delete.append(ObjectId(client_id_str))
 
-        # 4. Delete from MongoDB
-        if self.db is not None:
+        # 4. Perform Bulk Delete
+        if self.db is not None and ids_to_delete:
             try:
-                self.db['clients'].delete_one({'_id': ObjectId(client_id_str)})
-                QMessageBox.information(self, "Success", "Client deleted successfully!")
-                self.load_clients_table() # Refresh table
+                # Use the '$in' operator to delete multiple documents in one query.
+                result = self.db['clients'].delete_many({
+                    '_id': {'$in': ids_to_delete}
+                })
+                
+                # 5. Success & Refresh
+                QMessageBox.information(self, "Success", f"{result.deleted_count} clients deleted successfully.")
+                self.load_clients_table()
+                
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Could not delete: {e}")
