@@ -22,9 +22,10 @@ class MainController(QMainWindow):
             print(f"UI Loading Error: {e}")
             return
 
-        # 2. Database Connection
+        # 2. Database Connection & State
         # Establish connection to MongoDB Atlas.
         self.db = get_database()
+        self.current_client_id = None
 
         # 3. Initial Setup
         # Show the dashboard page by default on startup.
@@ -42,15 +43,17 @@ class MainController(QMainWindow):
         # Back to list
         self.btn_back_to_list.clicked.connect(lambda: self.stackedWidget.setCurrentWidget(self.page_clients))
 
-        # --- 5. CLIENT OPERATIONS (Add/Delete/Cancel/Save) ---
+        # --- 5. CLIENT OPERATIONS (Add/Delete/Cancel/Save/Edit) ---
         #Add
-        self.btn_add_new.clicked.connect(lambda: self.stackedWidget.setCurrentWidget(self.page_add_client))
+        self.btn_add_new.clicked.connect(self.prepare_add_mode)
         #Cancel
         self.btn_cancel.clicked.connect(lambda: self.stackedWidget.setCurrentWidget(self.page_clients))
         #Save
         self.btn_save.clicked.connect(self.save_client)
         #Delete
         self.btn_delete.clicked.connect(self.delete_client)
+        #Edit
+        self.btn_edit.clicked.connect(self.prepare_edit_mode)
 
         
     def load_clients_table(self):
@@ -223,6 +226,8 @@ class MainController(QMainWindow):
         # Safety Check: If there's no ID, stop.
         if not client_id_str:
             return
+        
+        self.current_client_id = ObjectId(client_id_str)
 
         # 2. Fetch Data from Database
         if self.db is not None:
@@ -251,3 +256,49 @@ class MainController(QMainWindow):
                 
             else:
                 QMessageBox.warning(self, "Error", "Client not found in database!")    
+
+    def prepare_add_mode(self):
+        """
+        Prepares the form for adding a NEW client.
+        Clears all input fields and resets the internal state ID.
+        """
+        # 1. Reset the State (Memory)
+        # CRITICAL: We set this to None. This tells the 'save_client' function 
+        # that we are performing an INSERT operation, not an UPDATE.
+        self.current_client_id = None
+        
+        # 2. Clear UI Fields (Wipe the slate clean)
+        self.txt_name.clear()
+        self.txt_phone.clear()
+        self.txt_notes.clear()
+        
+        # 3. Switch View
+        # Navigate to the form page so the user can start typing.
+        self.stackedWidget.setCurrentWidget(self.page_add_client)
+
+    def prepare_edit_mode(self):
+        """
+        Prepares the form for EDITING an existing client.
+        Fetches the latest data from the database and pre-fills the input fields.
+        """
+        # Safety Check: Do we have a target ID in memory?
+        # This ID is usually set by the 'open_client_detail' function.
+        if not self.current_client_id:
+            return
+
+        # 1. Fetch Fresh Data
+        # We go to the database again to ensure we have the most up-to-date info.
+        if self.db is not None:
+            client = self.db['clients'].find_one({'_id': self.current_client_id})
+            
+            if client:
+                # 2. Pre-fill the Form (Populate Fields)
+                # We use .get("key", "") to safely retrieve values. 
+                # If a key is missing, it returns an empty string instead of crashing.
+                self.txt_name.setText(client.get("full_name", ""))
+                self.txt_phone.setText(client.get("phone", ""))
+                self.txt_notes.setText(client.get("notes", ""))
+                
+                # 3. Switch View
+                # Show the form page, now filled with the client's data.
+                self.stackedWidget.setCurrentWidget(self.page_add_client)
