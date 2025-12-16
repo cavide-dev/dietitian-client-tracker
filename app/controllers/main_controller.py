@@ -537,10 +537,17 @@ class MainController(QMainWindow):
             bmr_val = str(data.get("bmr", "-"))
             self.table_measurements.setItem(row_index, 6, QTableWidgetItem(bmr_val))
 
-        # 5. UI Adjustment: Stretch columns to fill the table width
-        # Since we removed the "Notes" column, we can let all columns share the space evenly.
+       # --- TABLE STYLING ---
         header = self.table_measurements.horizontalHeader()
-        header.setSectionResizeMode(QHeaderView.Stretch)
+
+        # 1. ResizeToContents: Automatically adjusts each column width based on the text length.
+        # This ensures headers like "Metabolic Age" are fully visible and not cut off.
+        header.setSectionResizeMode(QHeaderView.ResizeToContents)
+
+        # 2. StretchLastSection: Forces the very last column (BMR) to extend 
+        # and fill any remaining empty space on the right side of the table.
+        # This prevents an ugly empty gap at the end.
+        header.setStretchLastSection(True)
 
     def delete_measurement(self):
         """
