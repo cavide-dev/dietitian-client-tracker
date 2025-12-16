@@ -268,6 +268,8 @@ class MainController(QMainWindow):
                 # 4. Switch the View
                 # Change the visible page to the Detail Page.
                 self.stackedWidget.setCurrentWidget(self.page_client_detail)
+                # Refresh the measurements list
+                self.load_client_measurements()
                 
             else:
                 QMessageBox.warning(self, "Error", "Client not found in database!")    
@@ -437,6 +439,58 @@ class MainController(QMainWindow):
             
             if success:
                 print("Measurement saved successfully.")
-                # TODO: Refresh the measurements list (to be implemented)
+                # Refresh the measurements list
+                self.load_client_measurements()
             else:
                 print("Failed to save measurement.")
+
+    def load_client_measurements(self):
+        """
+        Fetches the measurement history for the selected client and populates the table.
+        Adjusts column widths automatically to fit the content.
+        """
+        if not self.current_client_id:
+            return
+
+        # 1. Fetch history from database
+        history = self.get_client_history(self.current_client_id)
+        
+        # 2. Clear existing rows in the table
+        self.table_measurements.setRowCount(0)
+        
+        # 3. Populate the table
+        for row_index, data in enumerate(history):
+            self.table_measurements.insertRow(row_index)
+            
+            # Column 0: Date
+            date_val = data.get("date", "-")
+            self.table_measurements.setItem(row_index, 0, QTableWidgetItem(str(date_val)))
+            
+            # Column 1: Weight (kg)
+            weight_val = str(data.get("weight", "-"))
+            self.table_measurements.setItem(row_index, 1, QTableWidgetItem(weight_val))
+            
+            # Column 2: Body Fat (%)
+            fat_val = str(data.get("body_fat_ratio", "-"))
+            self.table_measurements.setItem(row_index, 2, QTableWidgetItem(fat_val))
+            
+            # Column 3: Muscle Mass (kg)
+            muscle_val = str(data.get("muscle_mass", "-"))
+            self.table_measurements.setItem(row_index, 3, QTableWidgetItem(muscle_val))
+
+            # Column 4: Metabolic Age
+            age_val = str(data.get("metabolic_age", "-"))
+            self.table_measurements.setItem(row_index, 4, QTableWidgetItem(age_val))
+            
+            # Column 5: Notes
+            notes_val = data.get("notes", "")
+            self.table_measurements.setItem(row_index, 5, QTableWidgetItem(notes_val))
+
+        # 4. Column Resizing Logic (Fixes the "too small" issue)
+        header = self.table_measurements.horizontalHeader()
+        
+        # First, set all columns to resize based on their content
+        header.setSectionResizeMode(QHeaderView.ResizeToContents)
+        
+        # Then, set the "Notes" column (Index 5) to stretch and fill remaining space
+        header.setSectionResizeMode(5, QHeaderView.Stretch)

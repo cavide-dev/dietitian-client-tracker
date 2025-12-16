@@ -362,6 +362,11 @@
         </column>
         <column>
          <property name="text">
+          <string>Metabolic Age</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
           <string>Notes</string>
          </property>
         </column>
