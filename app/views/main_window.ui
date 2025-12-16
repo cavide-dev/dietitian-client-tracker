@@ -311,8 +311,8 @@
        <widget class="QPushButton" name="btn_add_measurement">
         <property name="geometry">
          <rect>
-          <x>382</x>
-          <y>110</y>
+          <x>440</x>
+          <y>100</y>
           <width>221</width>
           <height>51</height>
          </rect>
@@ -334,9 +334,9 @@
        <widget class="QTableWidget" name="table_measurements">
         <property name="geometry">
          <rect>
-          <x>0</x>
-          <y>200</y>
-          <width>511</width>
+          <x>40</x>
+          <y>190</y>
+          <width>611</width>
           <height>391</height>
          </rect>
         </property>
