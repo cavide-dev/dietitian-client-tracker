@@ -1,7 +1,8 @@
 from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QHeaderView, QMessageBox, QAbstractItemView
 from PyQt5.uic import loadUi
 from PyQt5.QtCore import Qt  
-from bson.objectid import ObjectId 
+from bson.objectid import ObjectId
+from datetime import datetime
 import os
 from app.database import get_database
 
@@ -332,3 +333,80 @@ class MainController(QMainWindow):
             # SCENARIO: Adding a new client.
             # Action: Go back to the main 'Clients Table'.
             self.stackedWidget.setCurrentWidget(self.page_clients)
+
+    def get_client_history(self, client_id):
+        """
+        Fetches all measurement records for a specific client.
+        
+        Args:
+            client_id (ObjectId): The unique ID of the client.
+
+        Returns:
+            list: A list of measurement documents sorted by date (newest first).
+        """
+        if self.db is None:
+            return []
+        
+        # Query the 'measurements' collection for records belonging to this client
+        cursor = self.db['measurements'].find({'client_id': client_id})
+        
+        # Sort the results by 'date' in descending order (-1)
+        # This ensures the most recent measurements appear at the top
+        measurements = list(cursor.sort('date', -1))
+        
+        return measurements
+    
+    def add_measurement_entry(self, client_id, data):
+        """
+        Inserts a new measurement record into the database.
+
+        Args:
+            client_id (ObjectId): The unique ID of the client.
+            data (dict): A dictionary containing measurement details 
+                         (weight, height, fat ratio, metabolic age, etc.).
+
+        Returns:
+            bool: True if the operation was successful, False otherwise.
+        """
+        if self.db is None or not client_id:
+            return False
+
+        try:
+            # Prepare the document structure matching the database schema
+            measurement_record = {
+                "client_id": client_id,
+                "created_at": datetime.now(),     # System timestamp for audit
+                "date": data.get("date"),         # User-selected date for the measurement
+                
+                # 1. Basic Metrics
+                "weight": data.get("weight"),
+                "height": data.get("height"),
+                
+                # 2. Body Composition Analysis
+                "body_fat_ratio": data.get("body_fat_ratio"),
+                "muscle_mass": data.get("muscle_mass"),
+                "visceral_fat": data.get("visceral_fat"),
+                "metabolic_age": data.get("metabolic_age"),
+                "water_ratio": data.get("water_ratio"),
+                
+                # 3. Circumference Measurements (stored in a nested object)
+                "measurements": {
+                    "waist": data.get("waist"),
+                    "hip": data.get("hip"),
+                    "chest": data.get("chest"),
+                    "arm": data.get("arm"),
+                    "thigh": data.get("thigh")
+                },
+                
+                # 4. Additional Info
+                "notes": data.get("notes")
+            }
+
+            # Insert the document into the 'measurements' collection
+            self.db['measurements'].insert_one(measurement_record)
+            print(f"Measurement added successfully for client: {client_id}")
+            return True
+
+        except Exception as e:
+            print(f"Error adding measurement: {e}")
+            return False
