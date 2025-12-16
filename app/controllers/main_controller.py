@@ -391,7 +391,12 @@ class MainController(QMainWindow):
                          (weight, height, fat ratio, metabolic age, etc.).
 
         Returns:
-            bool: True if the operation was successful, False otherwise.
+        bool: True if the operation was successful, False otherwise.
+        Inserts a new measurement record into the database.
+        
+        Data Structure Strategy:
+        - Primary Metrics (Weight, BMR, Waist, Hip): Stored at ROOT level for easy access in tables.
+        - Secondary Metrics (Chest, Arm, Thigh): Stored in a NESTED dictionary to keep the document clean.
         """
         if self.db is None or not client_id:
             return False
@@ -401,29 +406,36 @@ class MainController(QMainWindow):
             measurement_record = {
                 "client_id": client_id,
                 "created_at": datetime.now(),     # System timestamp for audit
-                "date": data.get("date"),         # User-selected date for the measurement
+                "date": data.get("date"),         # User-selected date
                 
-                # 1. Basic Metrics
+                # --- 1. BASIC METRICS (Root Level) ---
                 "weight": data.get("weight"),
                 "height": data.get("height"),
                 
-                # 2. Body Composition Analysis
+                # --- 2. BODY COMPOSITION (Root Level) ---
                 "body_fat_ratio": data.get("body_fat_ratio"),
                 "muscle_mass": data.get("muscle_mass"),
                 "visceral_fat": data.get("visceral_fat"),
                 "metabolic_age": data.get("metabolic_age"),
                 "water_ratio": data.get("water_ratio"),
+                "bmr": data.get("bmr"),           # Important for analysis
                 
-                # 3. Circumference Measurements (stored in a nested object)
-                "measurements": {
-                    "waist": data.get("waist"),
-                    "hip": data.get("hip"),
+                # --- 3. PRIMARY CIRCUMFERENCES (Root Level) ---
+                # Kept at root because Waist is shown in the main table.
+                # Hip is kept here too, as it's often paired with Waist (WHR).
+                "waist": data.get("waist"),
+                "hip": data.get("hip"),
+                
+                # --- 4. SECONDARY MEASUREMENTS (Nested Level) ---
+                # Stored inside a sub-dictionary to organize detailed data.
+                # These are easily accessible for future charts/reports.
+                "measurements_extra": {
                     "chest": data.get("chest"),
                     "arm": data.get("arm"),
                     "thigh": data.get("thigh")
                 },
                 
-                # 4. Additional Info
+                # --- 5. NOTES ---
                 "notes": data.get("notes")
             }
 
