@@ -63,8 +63,23 @@ class MainController(QMainWindow):
         self.table_measurements.setContextMenuPolicy(Qt.CustomContextMenu)
         # Connect the signal to our function
         self.table_measurements.customContextMenuRequested.connect(self.show_context_menu)
-
         
+        # Diet Plan Button Connection
+        self.btn_save_diet.clicked.connect(self.save_diet_plan)
+
+        # --- Diet Plan Dropdown Connections ---
+        
+        # 1. Fill the dropdown when the app starts
+        self.load_client_dropdown()
+        
+        # 2. Update the target client when the user changes the selection
+        self.cmb_client_select.currentIndexChanged.connect(self.update_selected_client_from_dropdown)
+
+        self.btn_new_diet.clicked.connect(lambda: self.stack_diet_sub.setCurrentIndex(1))
+
+        self.btn_back_to_diet_list.clicked.connect(lambda: self.stack_diet_sub.setCurrentIndex(0))
+
+
     def load_clients_table(self):
         """
         Fetches client data from MongoDB and configures the table 
@@ -610,3 +625,117 @@ class MainController(QMainWindow):
         # 6. If user clicked "Delete", trigger the delete function
         if action == delete_action:
             self.delete_measurement()
+
+    def save_diet_plan(self):
+        """
+        Collects text from diet plan input fields and saves them to the MongoDB database.
+        Connected to the 'Save Diet Plan' button.
+        """
+        # 1. Validation: Check if a client is selected
+        if not self.current_client_id:
+            from PyQt5.QtWidgets import QMessageBox
+            QMessageBox.warning(None, "Warning", "Please select a client first!")
+            return
+
+        # 2. Collect Data: Get text from the input fields
+        # .strip() removes accidental spaces at the beginning or end
+        title = self.txt_diet_title.text().strip()
+        breakfast = self.txt_breakfast.toPlainText().strip()
+        snack_1 = self.txt_snack_1.toPlainText().strip() # Morning Snack
+        lunch = self.txt_lunch.toPlainText().strip()
+        snack_2 = self.txt_snack_2.toPlainText().strip() # Afternoon Snack
+        dinner = self.txt_dinner.toPlainText().strip()
+        snack_3 = self.txt_snack_3.toPlainText().strip() # Evening Snack
+
+        # 3. Validation: Check if the Title is empty (Title is mandatory)
+        if not title:
+            from PyQt5.QtWidgets import QMessageBox
+            QMessageBox.warning(None, "Warning", "Please enter a title for the diet plan!")
+            return
+
+        # 4. Prepare Data Package: Create the dictionary for MongoDB
+        from datetime import datetime
+        diet_data = {
+            "client_id": self.current_client_id,   # Links this plan to the selected client
+            "created_at": datetime.now(),          # Timestamp for sorting later
+            "title": title,                        # The name of the list (e.g., "Detox Week 1")
+            "content": {                           # Nested dictionary for meal details
+                "breakfast": breakfast,
+                "morning_snack": snack_1,
+                "lunch": lunch,
+                "afternoon_snack": snack_2,
+                "dinner": dinner,
+                "evening_snack": snack_3
+            },
+            "status": "active"                     # Default status
+        }
+
+        # 5. Database Operation: Insert the data
+        try:
+            self.db['diet_plans'].insert_one(diet_data)
+            
+            # Show success message
+            from PyQt5.QtWidgets import QMessageBox
+            QMessageBox.information(None, "Success", "Diet Plan saved successfully!")
+            
+            # Clear the inputs after saving (to be ready for a new one)
+            self.clear_diet_inputs()
+            
+        except Exception as e:
+            print(f"Error saving diet plan: {e}")
+            from PyQt5.QtWidgets import QMessageBox
+            QMessageBox.critical(None, "Error", f"Could not save diet plan: {e}")
+
+    def clear_diet_inputs(self):
+        """
+        Helper function to clear all text fields in the diet plan form.
+        Called automatically after a successful save.
+        """
+        self.txt_diet_title.clear()
+        self.txt_breakfast.clear()
+        self.txt_snack_1.clear()
+        self.txt_lunch.clear()
+        self.txt_snack_2.clear()
+        self.txt_dinner.clear()
+        self.txt_snack_3.clear()
+
+    def load_client_dropdown(self):
+        """
+        Fetches 'full_name' from the database and populates the client selection dropdown
+        on the Diet Plans page.
+        """
+        # Clear the box first to avoid duplicates
+        self.cmb_client_select.clear()
+        # Add a default empty option
+        self.cmb_client_select.addItem("Select Client...", None) 
+
+        try:
+            # Fetch only ID and Full Name from MongoDB
+            clients = self.db['clients'].find({}, {"_id": 1, "full_name": 1})
+            
+            for client in clients:
+                full_name = client.get("full_name", "")
+                
+                # Only add if a name exists
+                if full_name:
+                    client_id = str(client["_id"])
+                    # Add Item: Text shown to user, UserRole data (ID) hidden
+                    self.cmb_client_select.addItem(full_name, client_id)
+                
+        except Exception as e:
+            print(f"Error loading client dropdown: {e}")
+
+    def update_selected_client_from_dropdown(self, index):
+        """
+        Triggered when the user selects a name from the dropdown.
+        Updates the global 'current_client_id' variable used for saving.
+        """
+        # Retrieve the hidden ID from the selected item
+        client_id = self.cmb_client_select.currentData()
+        
+        if client_id:
+            self.current_client_id = client_id
+            print(f"Active Client Changed to: {self.current_client_id}")
+        else:
+            # If "Select Client..." is chosen, reset the ID
+            self.current_client_id = None
