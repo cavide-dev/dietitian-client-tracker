@@ -38,7 +38,7 @@ class MainController(QMainWindow):
         # --- 4. NAVIGATION BUTTONS (Menu Connections) ---
         self.btn_dashboard.clicked.connect(lambda: self.stackedWidget.setCurrentWidget(self.page_dashboard))
         self.btn_clients.clicked.connect(lambda: self.stackedWidget.setCurrentWidget(self.page_clients))
-        self.btn_diet_plans.clicked.connect(lambda: self.stackedWidget.setCurrentWidget(self.page_diet_plans))
+        self.btn_diet_plans.clicked.connect(self.switch_to_diet_page)
         self.btn_settings.clicked.connect(lambda: self.stackedWidget.setCurrentWidget(self.page_settings))
         # Double click the list
         self.tableWidget.cellDoubleClicked.connect(self.open_client_detail)
@@ -64,21 +64,27 @@ class MainController(QMainWindow):
         # Connect the signal to our function
         self.table_measurements.customContextMenuRequested.connect(self.show_context_menu)
         
-        # Diet Plan Button Connection
-        self.btn_save_diet.clicked.connect(self.save_diet_plan)
-
-        # --- Diet Plan Dropdown Connections ---
         
-        # 1. Fill the dropdown when the app starts
+        # DIET PAGE CONNECTIONS 
+        
+        # 1. Dropdown Setup
         self.load_client_dropdown()
-        
-        # 2. Update the target client when the user changes the selection
         self.cmb_client_select.currentIndexChanged.connect(self.update_selected_client_from_dropdown)
 
+        # 2. Navigation Buttons
+        
         self.btn_new_diet.clicked.connect(lambda: self.stack_diet_sub.setCurrentIndex(1))
 
         self.btn_back_to_diet_list.clicked.connect(lambda: self.stack_diet_sub.setCurrentIndex(0))
+            
+        # 3. Save Button
+        
+        self.btn_save_diet.clicked.connect(self.save_diet_plan)
+        # --- Default View Settings ---
+        self.stack_diet_sub.setCurrentIndex(0)
 
+        self.init_ui_logic()
+        
 
     def load_clients_table(self):
         """
@@ -629,7 +635,7 @@ class MainController(QMainWindow):
     def save_diet_plan(self):
         """
         Collects text from diet plan input fields and saves them to the MongoDB database.
-        Connected to the 'Save Diet Plan' button.
+        Includes 'Auto-Archiving' logic: Sets old active plans to 'passive' before saving the new one.
         """
         # 1. Validation: Check if a client is selected
         if not self.current_client_id:
@@ -638,28 +644,27 @@ class MainController(QMainWindow):
             return
 
         # 2. Collect Data: Get text from the input fields
-        # .strip() removes accidental spaces at the beginning or end
         title = self.txt_diet_title.text().strip()
         breakfast = self.txt_breakfast.toPlainText().strip()
-        snack_1 = self.txt_snack_1.toPlainText().strip() # Morning Snack
+        snack_1 = self.txt_snack_1.toPlainText().strip()
         lunch = self.txt_lunch.toPlainText().strip()
-        snack_2 = self.txt_snack_2.toPlainText().strip() # Afternoon Snack
+        snack_2 = self.txt_snack_2.toPlainText().strip()
         dinner = self.txt_dinner.toPlainText().strip()
-        snack_3 = self.txt_snack_3.toPlainText().strip() # Evening Snack
+        snack_3 = self.txt_snack_3.toPlainText().strip()
 
-        # 3. Validation: Check if the Title is empty (Title is mandatory)
+        # 3. Validation: Check if the Title is empty
         if not title:
             from PyQt5.QtWidgets import QMessageBox
             QMessageBox.warning(None, "Warning", "Please enter a title for the diet plan!")
             return
 
-        # 4. Prepare Data Package: Create the dictionary for MongoDB
+        # 4. Prepare Data Package
         from datetime import datetime
         diet_data = {
-            "client_id": self.current_client_id,   # Links this plan to the selected client
-            "created_at": datetime.now(),          # Timestamp for sorting later
-            "title": title,                        # The name of the list (e.g., "Detox Week 1")
-            "content": {                           # Nested dictionary for meal details
+            "client_id": self.current_client_id,
+            "created_at": datetime.now(),
+            "title": title,
+            "content": {
                 "breakfast": breakfast,
                 "morning_snack": snack_1,
                 "lunch": lunch,
@@ -667,19 +672,35 @@ class MainController(QMainWindow):
                 "dinner": dinner,
                 "evening_snack": snack_3
             },
-            "status": "active"                     # Default status
+            "status": "active" # The new plan is always active initially
         }
 
-        # 5. Database Operation: Insert the data
+        # 5. Database Operation
         try:
+            # --- AUTO-ARCHIVING LOGIC ---
+            # Before adding the new plan, find all currently 'active' plans for this client
+            # and update their status to 'passive'.
+            self.db['diet_plans'].update_many(
+                {"client_id": self.current_client_id, "status": "active"},
+                {"$set": {"status": "passive"}}
+            )
+            
+            # Now insert the new 'active' plan
             self.db['diet_plans'].insert_one(diet_data)
             
             # Show success message
             from PyQt5.QtWidgets import QMessageBox
             QMessageBox.information(None, "Success", "Diet Plan saved successfully!")
             
-            # Clear the inputs after saving (to be ready for a new one)
+            # Clear inputs
             self.clear_diet_inputs()
+            
+            # --- AFTER SAVE ACTIONS (NEW) ---
+            # 1. Refresh the table to show the new diet (and the passive status of old ones)
+            self.load_client_diet_plans()
+            
+            # 2. Automatically return to the Table View (Page 0)
+            self.stack_diet_sub.setCurrentIndex(0)
             
         except Exception as e:
             print(f"Error saving diet plan: {e}")
@@ -698,6 +719,7 @@ class MainController(QMainWindow):
         self.txt_snack_2.clear()
         self.txt_dinner.clear()
         self.txt_snack_3.clear()
+
 
     def load_client_dropdown(self):
         """
@@ -736,6 +758,117 @@ class MainController(QMainWindow):
         if client_id:
             self.current_client_id = client_id
             print(f"Active Client Changed to: {self.current_client_id}")
+
+            self.load_client_diet_plans()
         else:
             # If "Select Client..." is chosen, reset the ID
             self.current_client_id = None
+    
+    def load_client_diet_plans(self):
+        """
+        Fetches the selected client's diet plans from the database and populates the TableWidget.
+        """
+        # 1. Clear the Table: Remove all existing rows to start fresh
+        self.table_diet_history.setRowCount(0)
+
+        # If no client is selected, stop here
+        if not self.current_client_id:
+            return
+
+        try:
+            # 2. Database Query: Find diets for this client
+            # Sort by 'created_at' descending (-1) so the newest is at the top
+            import pymongo
+            diets = self.db['diet_plans'].find(
+                {"client_id": self.current_client_id}
+            ).sort("created_at", pymongo.DESCENDING)
+
+            # 3. Loop through results and add rows
+            for diet in diets:
+                # Get the current row count (e.g., 0, then 1, then 2...)
+                row_position = self.table_diet_history.rowCount()
+                
+                # Create a new empty row at that position
+                self.table_diet_history.insertRow(row_position)
+                
+                # --- Prepare Data ---
+                # Title
+                title = diet.get("title", "No Title")
+                
+                # Date (Format: YYYY-MM-DD)
+                raw_date = diet.get("created_at")
+                if raw_date:
+                    date_str = raw_date.strftime("%Y-%m-%d")
+                else:
+                    date_str = "-"
+                
+                # Status (Active/Archived)
+                status = diet.get("status", "Active")
+                
+                # --- Create Cells (Items) ---
+                from PyQt5.QtWidgets import QTableWidgetItem
+                from PyQt5.QtCore import Qt
+
+                # Column 0: Date
+                self.table_diet_history.setItem(row_position, 0, QTableWidgetItem(date_str))
+                
+                # Column 1: Title
+                self.table_diet_history.setItem(row_position, 1, QTableWidgetItem(title))
+                
+                # Column 2: Status
+                self.table_diet_history.setItem(row_position, 2, QTableWidgetItem(status))
+                
+                # --- CRITICAL STEP: Hidden ID ---
+                # We store the Diet's unique ID in the first cell invisibly.
+                # This allows us to know WHICH diet to open/edit later.
+                self.table_diet_history.item(row_position, 0).setData(Qt.UserRole, str(diet["_id"]))
+                
+        except Exception as e:
+            print(f"Error loading diet table: {e}")
+
+    def switch_to_diet_page(self):
+        """
+        Switches the main view to the Diet Plans page and resets the 
+        internal sub-stack to the 'Table View' (Index 0).
+        Ensures the user always sees the list first, not the form.
+        """
+        # 1. Switch the Main Stacked Widget to the Diet Page
+        self.stackedWidget.setCurrentWidget(self.page_diet_plans) 
+        
+        # 2. Reset the Sub-Stacked Widget to the List/Table View (Page 0)
+        # This fixes the issue of getting stuck on the 'Add Diet' form 
+        # when navigating back to this page.
+        try:
+            self.stack_diet_sub.setCurrentIndex(0)
+        except Exception as e:
+            print(f"Error resetting diet sub-stack: {e}")
+
+    def init_ui_logic(self):
+        """
+        Initializes static UI configuration.
+        This method is called ONCE when the application starts.
+
+        Purpose:
+        - Apply visual and layout-related settings
+        - Keep UI styling separate from data-loading logic
+        - Prevent UI from resetting on every data refresh
+        """
+
+        # --- Diet History Table: Column Layout ---
+        header = self.table_diet_history.horizontalHeader()
+
+        # Make all columns share the available width evenly
+        header.setSectionResizeMode(QHeaderView.Stretch)
+
+        # Ensure the last column expands to fill any remaining space
+        header.setStretchLastSection(True)
+
+        # --- Table Appearance Improvements ---
+        # Hide the row index column (cleaner look)
+        self.table_diet_history.verticalHeader().setVisible(False)
+
+        # Enable alternating row colors for better readability
+        self.table_diet_history.setAlternatingRowColors(True)
+
+        # Show grid lines between cells
+        self.table_diet_history.setShowGrid(True)
