@@ -542,12 +542,18 @@ class MainController(QMainWindow):
 
         # 1. ResizeToContents: Automatically adjusts each column width based on the text length.
         # This ensures headers like "Metabolic Age" are fully visible and not cut off.
-        header.setSectionResizeMode(QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(QHeaderView.Stretch)
+        # header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(5, QHeaderView.ResizeToContents) 
 
         # 2. StretchLastSection: Forces the very last column (BMR) to extend 
-        # and fill any remaining empty space on the right side of the table.
-        # This prevents an ugly empty gap at the end.
-        header.setStretchLastSection(True)
+        header.setStretchLastSection(False)
+
+        # --- ROW / VISUAL IMPROVEMENTS ---
+        self.table_measurements.setAlternatingRowColors(True)
+        self.table_measurements.verticalHeader().setVisible(False)
+        self.table_measurements.setShowGrid(True)
+
 
     def delete_measurement(self):
         """

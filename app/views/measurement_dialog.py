@@ -144,40 +144,15 @@ class MeasurementDialog(QDialog):
             "muscle_mass": self.input_muscle.value(),
             "visceral_fat": self.input_visceral.value(),
             "metabolic_age": self.input_metabolic_age.value(),
-            "bmr": self.input_bmr.value(),         # Important!
+            "bmr": self.input_bmr.value(),         
             "water_ratio": self.input_water.value(),
 
             # Circumferences (Saved to DB for future charts/details)
-            "waist": self.input_waist.value(),     # Important!
+            "waist": self.input_waist.value(),     
             "hip": self.input_hip.value(),
-            "chest": self.input_chest.value(),     # Saved!
-            "arm": self.input_arm.value(),         # Saved!
-            "thigh": self.input_thigh.value(),     # Saved!
+            "chest": self.input_chest.value(),     
+            "arm": self.input_arm.value(),         
+            "thigh": self.input_thigh.value(),    
 
-            "notes": self.input_notes.toPlainText()
-        }
-
-    def get_data(self):
-        """
-        Collects all data from the input fields and returns a dictionary.
-        This is called by the main controller after the user clicks 'Save'.
-        """
-        return {
-            # Convert QDate to Python Date String (YYYY-MM-DD)
-            "date": self.input_date.date().toPyDate().strftime("%Y-%m-%d"),
-            
-            # .value() returns the float number from the SpinBox
-            "weight": self.input_weight.value(),
-            "height": self.input_height.value(),
-            "body_fat_ratio": self.input_fat.value(),
-            "muscle_mass": self.input_muscle.value(),
-            "visceral_fat": self.input_visceral.value(),
-            "metabolic_age": self.input_metabolic_age.value(),
-            "water_ratio": self.input_water.value(),
-            "waist": self.input_waist.value(),
-            "hip": self.input_hip.value(),
-            "chest": self.input_chest.value(),
-            "arm": self.input_arm.value(),
-            "thigh": self.input_thigh.value(),
             "notes": self.input_notes.toPlainText()
         }
