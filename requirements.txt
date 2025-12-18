@@ -1,0 +1,3 @@
+PyQt5==5.15.x
+pymongo==4.x.x
+python-dotenv==x.x.x

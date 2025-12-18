@@ -1,12 +1,12 @@
 from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QHeaderView, QMessageBox, QAbstractItemView, QDialog, QMenu
 from PyQt5.uic import loadUi
-from PyQt5.QtCore import Qt  
+from PyQt5.QtCore import Qt, QDate 
 from bson.objectid import ObjectId
 from datetime import datetime
 from app.database import get_database
 from app.views.measurement_dialog import MeasurementDialog
 import os
-
+import pymongo
 class MainController(QMainWindow):
     def __init__(self):
         """
@@ -151,11 +151,13 @@ class MainController(QMainWindow):
             birth_date = self.date_birth_add.date().toString("yyyy-MM-dd")
         except Exception:
             # Olur da bir hata olursa bugünün tarihini atayalım (Çökmemesi için)
-            from PyQt5.QtCore import QDate
             birth_date = QDate.currentDate().toString("yyyy-MM-dd")
 
         if not full_name:
             QMessageBox.warning(self, "Warning", "Name cannot be empty!")
+            return
+        if not phone:
+            QMessageBox.warning(self, "Validation Error", "Phone number cannot be empty!")
             return
 
         if self.db is not None:
@@ -245,8 +247,12 @@ class MainController(QMainWindow):
             client_id_str = name_item.data(Qt.UserRole)
             
             if client_id_str:
-                # Convert String ID back to MongoDB ObjectId
-                ids_to_delete.append(ObjectId(client_id_str))
+            # Convert String ID back to MongoDB ObjectId
+                try:
+                    ids_to_delete.append(ObjectId(client_id_str))
+                except Exception as e:
+                    print(f"Warning: Could not convert ID '{client_id_str}': {e}")
+                    continue
 
         # 4. Perform Bulk Delete
         if self.db is not None and ids_to_delete:
@@ -281,8 +287,12 @@ class MainController(QMainWindow):
         # Safety Check: If there's no ID, stop.
         if not client_id_str:
             return
-        
-        self.current_client_id = ObjectId(client_id_str)
+    
+        try:
+            self.current_client_id = ObjectId(client_id_str)
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"Invalid client ID format: {e}")
+            return
 
         # 2. Fetch Data from Database
         if self.db is not None:
@@ -594,8 +604,14 @@ class MainController(QMainWindow):
 
         # 3. Delete from Database
         try:
-            result = self.db['measurements'].delete_one({'_id': ObjectId(measurement_id)})
+            try:
+                obj_id = ObjectId(measurement_id)
+            except Exception as e:
+                print(f"Error: Invalid measurement ID format: {e}")
+                return
             
+            result = self.db['measurements'].delete_one({'_id': obj_id})
+
             if result.deleted_count > 0:
                 print(f"Deleted measurement ID: {measurement_id}")
                 # 4. Refresh the table to show changes
@@ -639,7 +655,6 @@ class MainController(QMainWindow):
         """
         # 1. Validation: Check if a client is selected
         if not self.current_client_id:
-            from PyQt5.QtWidgets import QMessageBox
             QMessageBox.warning(None, "Warning", "Please select a client first!")
             return
 
@@ -654,12 +669,24 @@ class MainController(QMainWindow):
 
         # 3. Validation: Check if the Title is empty
         if not title:
-            from PyQt5.QtWidgets import QMessageBox
             QMessageBox.warning(None, "Warning", "Please enter a title for the diet plan!")
             return
 
-        # 4. Prepare Data Package
-        from datetime import datetime
+        # 4. Validation: Check main meals (Breakfast, Lunch, Dinner)
+        if not breakfast:
+            QMessageBox.warning(None, "Validation Error", "Breakfast cannot be empty!")
+            return
+
+        if not lunch:
+            QMessageBox.warning(None, "Validation Error", "Lunch cannot be empty!")
+            return
+
+        if not dinner:
+            QMessageBox.warning(None, "Validation Error", "Dinner cannot be empty!")
+            return
+
+
+        # 5. Prepare Data Package
         diet_data = {
             "client_id": self.current_client_id,
             "created_at": datetime.now(),
@@ -689,7 +716,6 @@ class MainController(QMainWindow):
             self.db['diet_plans'].insert_one(diet_data)
             
             # Show success message
-            from PyQt5.QtWidgets import QMessageBox
             QMessageBox.information(None, "Success", "Diet Plan saved successfully!")
             
             # Clear inputs
@@ -704,7 +730,6 @@ class MainController(QMainWindow):
             
         except Exception as e:
             print(f"Error saving diet plan: {e}")
-            from PyQt5.QtWidgets import QMessageBox
             QMessageBox.critical(None, "Error", f"Could not save diet plan: {e}")
 
     def clear_diet_inputs(self):
@@ -778,7 +803,6 @@ class MainController(QMainWindow):
         try:
             # 2. Database Query: Find diets for this client
             # Sort by 'created_at' descending (-1) so the newest is at the top
-            import pymongo
             diets = self.db['diet_plans'].find(
                 {"client_id": self.current_client_id}
             ).sort("created_at", pymongo.DESCENDING)
@@ -806,8 +830,6 @@ class MainController(QMainWindow):
                 status = diet.get("status", "Active")
                 
                 # --- Create Cells (Items) ---
-                from PyQt5.QtWidgets import QTableWidgetItem
-                from PyQt5.QtCore import Qt
 
                 # Column 0: Date
                 self.table_diet_history.setItem(row_position, 0, QTableWidgetItem(date_str))
