@@ -6,6 +6,7 @@ from datetime import datetime
 from app.database import get_database
 from app.views.measurement_dialog import MeasurementDialog
 import os
+import sys
 import pymongo
 class MainController(QMainWindow):
     def __init__(self):
@@ -21,12 +22,20 @@ class MainController(QMainWindow):
         try:
             loadUi(ui_path, self)
         except Exception as e:
-            print(f"UI Loading Error: {e}")
-            return
+            QMessageBox.critical(self, "UI Loading Error", 
+                            f"Could not load UI file: {e}\n\nPath: {ui_path}")
+            sys.exit(1)  
 
         # 2. Database Connection & State
         # Establish connection to MongoDB Atlas.
         self.db = get_database()
+        
+        # Check if database connection failed
+        if self.db is None:
+            QMessageBox.critical(self, "Connection Error", 
+                                "Could not connect to MongoDB. Please check your internet connection and .env file.")
+            sys.exit(1)  
+        
         self.current_client_id = None
 
         # 3. Initial Setup
