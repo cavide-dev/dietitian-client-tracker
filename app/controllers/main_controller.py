@@ -37,6 +37,8 @@ class MainController(QMainWindow):
             sys.exit(1)  
         
         self.current_client_id = None
+        
+        self.current_diet_id = None  # For tracking which diet is being edited
 
         # 3. Initial Setup
         # Show the dashboard page by default on startup.
@@ -82,13 +84,17 @@ class MainController(QMainWindow):
 
         # 2. Navigation Buttons
         
-        self.btn_new_diet.clicked.connect(lambda: self.stack_diet_sub.setCurrentIndex(1))
-
+        self.btn_new_diet.clicked.connect(self.prepare_add_diet_mode)
+        self.table_diet_history.cellDoubleClicked.connect(self.open_diet_detail)
         self.btn_back_to_diet_list.clicked.connect(lambda: self.stack_diet_sub.setCurrentIndex(0))
-            
-        # 3. Save Button
+
+        # Save button - handles both NEW and UPDATE based on current_diet_id
+        self.btn_save_diet.clicked.connect(self.handle_diet_save)
+
+        # Delete button for diet
+        if hasattr(self, 'btn_delete_diet'):
+            self.btn_delete_diet.clicked.connect(self.delete_diet_plan_from_detail)
         
-        self.btn_save_diet.clicked.connect(self.save_diet_plan)
         # --- Default View Settings ---
         self.stack_diet_sub.setCurrentIndex(0)
 
@@ -903,3 +909,181 @@ class MainController(QMainWindow):
 
         # Show grid lines between cells
         self.table_diet_history.setShowGrid(True)
+
+    def open_diet_detail(self, row, column):
+        """
+        Triggered when user double-clicks a diet plan in the table.
+        Loads the diet data and switches to edit mode.
+            """
+        # 1. Get the hidden Diet ID
+        date_item = self.table_diet_history.item(row, 0)
+        if not date_item:
+            return
+        
+        diet_id_str = date_item.data(Qt.UserRole)
+        if not diet_id_str:
+                return
+            
+        # 2. Convert to ObjectId and fetch from DB
+        try:
+            diet_id = ObjectId(diet_id_str)
+            diet = self.db['diet_plans'].find_one({'_id': diet_id})
+            
+            if not diet:
+                QMessageBox.warning(self, "Error", "Diet plan not found!")
+                return
+            
+            # 3. Store the diet ID in memory (for updating later)
+            self.current_diet_id = diet_id
+            
+            # 4. Pre-fill the form with existing data
+            self.txt_diet_title.setText(diet.get('title', ''))
+            self.txt_breakfast.setPlainText(diet.get('content', {}).get('breakfast', ''))
+            self.txt_snack_1.setPlainText(diet.get('content', {}).get('morning_snack', ''))
+            self.txt_lunch.setPlainText(diet.get('content', {}).get('lunch', ''))
+            self.txt_snack_2.setPlainText(diet.get('content', {}).get('afternoon_snack', ''))
+            self.txt_dinner.setPlainText(diet.get('content', {}).get('dinner', ''))
+            self.txt_snack_3.setPlainText(diet.get('content', {}).get('evening_snack', ''))
+            
+            # 5. Switch to edit page 
+            self.stack_diet_sub.setCurrentIndex(1)
+             # 6. Enable delete button (we're editing, not creating)
+            if hasattr(self, 'btn_delete_diet'):
+                self.btn_delete_diet.setEnabled(True)
+                self.btn_delete_diet.setStyleSheet("background-color: #ff4444; color: white;")
+            
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Could not open diet: {e}")
+    
+    def update_diet_plan(self):
+        """
+        Updates an existing diet plan.
+        Similar to save_diet_plan() but with UPDATE instead of INSERT.
+        """
+        # 1. Check if we're editing a diet
+        if not hasattr(self, 'current_diet_id') or not self.current_diet_id:
+            QMessageBox.warning(None, "Error", "No diet plan selected for editing!")
+            return
+        
+        # 2. Collect data
+        title = self.txt_diet_title.text().strip()
+        breakfast = self.txt_breakfast.toPlainText().strip()
+        snack_1 = self.txt_snack_1.toPlainText().strip()
+        lunch = self.txt_lunch.toPlainText().strip()
+        snack_2 = self.txt_snack_2.toPlainText().strip()
+        dinner = self.txt_dinner.toPlainText().strip()
+        snack_3 = self.txt_snack_3.toPlainText().strip()
+        
+        # 3. Validation
+        if not title:
+            QMessageBox.warning(None, "Validation Error", "Title cannot be empty!")
+            return
+        
+        if not breakfast:
+            QMessageBox.warning(None, "Validation Error", "Breakfast cannot be empty!")
+            return
+        
+        if not lunch:
+            QMessageBox.warning(None, "Validation Error", "Lunch cannot be empty!")
+            return
+        
+        if not dinner:
+            QMessageBox.warning(None, "Validation Error", "Dinner cannot be empty!")
+            return
+        
+        # 4. Prepare updated data
+        updated_data = {
+            "title": title,
+            "content": {
+                "breakfast": breakfast,
+                "morning_snack": snack_1,
+                "lunch": lunch,
+                "afternoon_snack": snack_2,
+                "dinner": dinner,
+                "evening_snack": snack_3
+            },
+            "updated_at": datetime.now()  # Güncelleme zamanı
+        }
+        
+        # 5. Update in database
+        try:
+            result = self.db['diet_plans'].update_one(
+                {'_id': self.current_diet_id},
+                {'$set': updated_data}
+            )
+            
+            if result.modified_count > 0:
+                QMessageBox.information(None, "Success", "Diet plan updated successfully!")
+                self.clear_diet_inputs()
+                self.load_client_diet_plans()
+                self.stack_diet_sub.setCurrentIndex(0)
+                self.current_diet_id = None
+            else:
+                QMessageBox.warning(None, "Warning", "No changes were made.")
+        
+        except Exception as e:
+            QMessageBox.critical(None, "Error", f"Could not update diet plan: {e}")
+
+    def delete_diet_plan_from_detail(self):
+        """
+        Deletes the currently open diet plan after confirmation.
+        """
+        # 1. Check if we're editing a diet
+        if not hasattr(self, 'current_diet_id') or not self.current_diet_id:
+            QMessageBox.warning(None, "Error", "No diet plan selected!")
+            return
+        
+        # 2. Confirmation dialog
+        reply = QMessageBox.question(
+            None,
+            'Confirm Delete',
+            'Are you sure you want to delete this diet plan?',
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply == QMessageBox.No:
+            return
+        
+        # 3. Delete from database
+        try:
+            result = self.db['diet_plans'].delete_one({'_id': self.current_diet_id})
+            
+            if result.deleted_count > 0:
+                QMessageBox.information(None, "Success", "Diet plan deleted successfully!")
+                self.clear_diet_inputs()
+                self.load_client_diet_plans()
+                self.stack_diet_sub.setCurrentIndex(0)
+                self.current_diet_id = None
+            else:
+                QMessageBox.warning(None, "Error", "Could not find diet plan to delete.")
+        
+        except Exception as e:
+            QMessageBox.critical(None, "Error", f"Could not delete diet plan: {e}")
+
+    def handle_diet_save(self):
+        """
+        Smart save handler - decides whether to INSERT or UPDATE based on current_diet_id.
+        """
+        if hasattr(self, 'current_diet_id') and self.current_diet_id:
+            # Editing mode
+            self.update_diet_plan()
+        else:
+            # New diet mode
+            self.save_diet_plan()
+
+    def prepare_add_diet_mode(self):
+        """
+        Prepares the form for adding a NEW diet plan.
+        Clears all fields and disables delete button.
+        """
+        self.current_diet_id = None
+        self.clear_diet_inputs()
+        
+        # Disable delete button (no diet to delete)
+        if hasattr(self, 'btn_delete_diet'):
+            self.btn_delete_diet.setEnabled(False)
+            self.btn_delete_diet.setStyleSheet("background-color: #cccccc; color: gray;")
+        
+        # Go to form page
+        self.stack_diet_sub.setCurrentIndex(1)
