@@ -6,6 +6,7 @@ from datetime import datetime
 from app.database import get_database
 from app.views.measurement_dialog import MeasurementDialog
 from app.views.stats_card_widget import StatsCard, StatsCardContainer
+from app.views.chart_widget import TrendChart
 import os
 import sys
 import pymongo
@@ -40,7 +41,8 @@ class MainController(QMainWindow):
         self.current_client_id = None
         
         self.current_diet_id = None  # For tracking which diet is being edited
-        self.stats_container = None  # Stats container'ı memory'de tut
+        self.stats_container = None  # Will hold the Stats container
+        self.trend_chart = None  # Will hold the chart widget
         # 3. Initial Setup
         # Show the dashboard page by default on startup.
         self.stackedWidget.setCurrentWidget(self.page_dashboard)
@@ -373,8 +375,17 @@ class MainController(QMainWindow):
                     self.stats_container.add_stats_card("Muscle", f"{latest.get('muscle_mass', 0)}", muscle_change, " kg")
 
                     # Add to tab_overview (first tab of tabWidget)
-                    self.tabWidget.widget(0).layout().insertWidget(0, self.stats_container)  # ← self. ekle
-                                
+                    self.tabWidget.widget(0).layout().insertWidget(0, self.stats_container)
+
+                  # Create and display trend chart
+                if self.trend_chart is not None:
+                    self.trend_chart.plot_trends([])  # Clear
+                else:
+                    self.trend_chart = TrendChart()
+                    self.tabWidget.widget(0).layout().insertWidget(1, self.trend_chart)  # Insert after stats
+
+                self.trend_chart.plot_trends(measurements) 
+                           
             else:
                 QMessageBox.warning(self, "Error", "Client not found in database!")
 

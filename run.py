@@ -17,6 +17,7 @@ def main():
     
     # 3. Show the Window
     # Without this call, the application would run in the background invisible
+    main_window.resize(1400, 850)
     main_window.show()
     
     # 4. Start the Event Loop
