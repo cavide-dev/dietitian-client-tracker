@@ -1112,7 +1112,6 @@ class MainController(QMainWindow):
                 
                 # Status (Active/Archived)
                 status = diet.get("status", "Active")
-                print(f"DEBUG: Status value = '{status}'")  # Kontrol et
                 
                 # --- Create Cells (Items) ---
                 
