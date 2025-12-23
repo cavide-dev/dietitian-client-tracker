@@ -12,12 +12,18 @@ import os
 import sys
 import pymongo
 class MainController(QMainWindow):
-    def __init__(self):
+    def __init__(self, current_user=None):
         """
         Main Application Logic.
         Initializes the UI, database connection, and event handlers.
+        
+        Args:
+            current_user: Dictionary with user data {"username": "...", "fullname": "...", ...}
         """
         super(MainController, self).__init__()
+        
+        # Store current user data
+        self.current_user = current_user
         
         # 1. Load UI File
         # We load the .ui file dynamically relative to this script's location.
@@ -123,13 +129,19 @@ class MainController(QMainWindow):
         """
         Fetches client data from MongoDB and configures the table 
         for multi-selection and optimal layout.
+        
+        Only shows clients belonging to the current user.
         """
         if self.db is None:
             return
 
-        # 1. Fetch Data
+        # 1. Fetch Data (only for current user)
         clients_collection = self.db['clients']
-        all_clients = list(clients_collection.find())
+        # Filter clients by current dietician username
+        query = {}
+        if self.current_user:
+            query = {"dietician_username": self.current_user.get("username")}
+        all_clients = list(clients_collection.find(query))
         
         # 2. Configure Table Layout
         self.tableWidget.setRowCount(len(all_clients))
@@ -175,9 +187,9 @@ class MainController(QMainWindow):
         Called when dashboard page is displayed.
         
         Data displayed:
-        - Total Clients count
-        - Total Measurements count
-        - Active Diets count
+        - Total Clients count (for current user only)
+        - Total Measurements count (for current user only)
+        - Active Diets count (for current user only)
         - Recent Activity list (last 10 actions)
         """
         if self.db is None:
@@ -186,24 +198,32 @@ class MainController(QMainWindow):
         try:
             # ===== 1. STATS CARDS =====
             
-            # Total Clients
-            total_clients = self.db['clients'].count_documents({})
+            # Build query filter for current user
+            user_filter = {}
+            if self.current_user:
+                user_filter = {"dietician_username": self.current_user.get("username")}
+            
+            # Total Clients (only for current user)
+            total_clients = self.db['clients'].count_documents(user_filter)
             self.label_total_clients.setText(str(total_clients))
             
-            # Total Measurements
-            total_measurements = self.db['measurements'].count_documents({})
+            # Total Measurements (only for current user's clients)
+            total_measurements = self.db['measurements'].count_documents(user_filter)
             self.label_total_measurements.setText(str(total_measurements))
             
-            # Active Diets (status = 'active')
-            active_diets = self.db['diet_plans'].count_documents({"status": "active"})
+            # Active Diets (status = 'active' AND for current user only)
+            diet_filter = {"status": "active"}
+            if self.current_user:
+                diet_filter["dietician_username"] = self.current_user.get("username")
+            active_diets = self.db['diet_plans'].count_documents(diet_filter)
             self.label_active_diets.setText(str(active_diets))
             
             # ===== 2. RECENT ACTIVITY =====
             
             self.list_recent_activity.clear()
             
-            # Get recent clients (últimas 5 añadidos)
-            recent_clients = list(self.db['clients'].find().sort("_id", -1).limit(5))
+            # Get recent clients (latest 5 for current user)
+            recent_clients = list(self.db['clients'].find(user_filter).sort("_id", -1).limit(5))
             for client in recent_clients:
                 activity_text = f"✓ {client.get('full_name', 'Unknown')} - Client added"
                 self.list_recent_activity.addItem(activity_text)
@@ -293,7 +313,8 @@ class MainController(QMainWindow):
                     "full_name": full_name, 
                     "phone": phone, 
                     "notes": notes,
-                    "birth_date": birth_date  
+                    "birth_date": birth_date,
+                    "dietician_username": self.current_user.get("username") if self.current_user else None
                 }
 
                 # --- DECISION TIME ---
@@ -641,6 +662,7 @@ class MainController(QMainWindow):
             # Prepare the document structure matching the database schema
             measurement_record = {
                 "client_id": client_id,
+                "dietician_username": self.current_user.get("username") if self.current_user else None,
                 "created_at": datetime.now(),     # System timestamp for audit
                 "date": data.get("date"),         # User-selected date
                 
@@ -1129,6 +1151,7 @@ class MainController(QMainWindow):
         # 5. Prepare Data Package
         diet_data = {
             "client_id": self.current_client_id,
+            "dietician_username": self.current_user.get("username") if self.current_user else None,
             "created_at": datetime.now(),
             "title": title,
             "content": {

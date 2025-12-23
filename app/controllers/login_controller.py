@@ -15,6 +15,9 @@ import sys
 # Load environment variables from .env file
 load_dotenv()
 
+# Import SignupController for signup functionality
+from app.controllers.signup_controller import SignupController
+
 class LoginController(QMainWindow):
     # Signal: Emitted when login is successful
     # This allows run.py to know when user has logged in successfully
@@ -127,8 +130,29 @@ class LoginController(QMainWindow):
     
     def open_signup(self):
         """
-        Open signup window
+        Open signup window for new user registration
         """
-        # We'll implement this in the next step
-        print("Opening signup window...")
-        # TODO: Implement signup window
+        # Create signup window
+        self.signup_window = SignupController()
+        
+        # When signup is successful, connect signal to refresh login
+        self.signup_window.signup_successful.connect(self.on_signup_complete)
+        
+        # Show signup window
+        self.signup_window.show()
+        
+        # Hide login window (optional - keeps it in background)
+        self.hide()
+    
+    def on_signup_complete(self):
+        """
+        Called when signup is completed
+        Show login window again
+        """
+        # Clear login form
+        self.input_username.setText("")
+        self.input_password.setText("")
+        self.label_error.setText("Account created! Please sign in.")
+        
+        # Show login window
+        self.show()

@@ -42,12 +42,13 @@ def main():
         Called when user successfully logs in
         user_data = {"username": "admin", "email": "...", ...}
         """
-        # Create main window
-        main_window = MainController()
+        # Create main window and pass user data
+        main_window = MainController(user_data)
         main_window.resize(1200, 700)
         main_window.show()
         
-        # TODO: Pass user_data to main_window if needed
+        # Hide login window after successful login
+        login_window.hide()
         # For now, we'll implement this later
     
     # Connect the signal

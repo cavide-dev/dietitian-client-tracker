@@ -1,3 +1,9 @@
+import sys
+import os
+
+# Add parent directory to path so we can import 'app'
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from app.database import get_database
 
 def add_fake_data():
@@ -25,21 +31,40 @@ def add_fake_data():
             "phone": "+1 555 0199",
             "email": "johndoe@example.com",
             "gender": "Male",
-            "notes": "Type 2 Diabetes patient. Needs low sugar diet."
+            "notes": "Type 2 Diabetes patient. Needs low sugar diet.",
+            "dietician_username": "admin"
         },
         {
             "full_name": "Jane Smith",
             "phone": "+1 555 0200",
             "email": "janesmith@example.com",
             "gender": "Female",
-            "notes": "Vegan diet. Prefers plant-based proteins."
+            "notes": "Vegan diet. Prefers plant-based proteins.",
+            "dietician_username": "admin"
         },
         {
             "full_name": "Ali Yilmaz",
             "phone": "+90 555 123 45 67",
             "email": "ali@example.com",
             "gender": "Male",
-            "notes": "Gluten intolerant (Celiac)."
+            "notes": "Gluten intolerant (Celiac).",
+            "dietician_username": "admin"
+        },
+        {
+            "full_name": "Maria Garcia",
+            "phone": "+34 666 123 456",
+            "email": "maria@example.com",
+            "gender": "Female",
+            "notes": "High cholesterol. Needs low-fat diet.",
+            "dietician_username": "testuser"
+        },
+        {
+            "full_name": "Ahmed Hassan",
+            "phone": "+20 100 123 4567",
+            "email": "ahmed@example.com",
+            "gender": "Male",
+            "notes": "Weight loss program. 30 lbs target.",
+            "dietician_username": "testuser"
         }
     ]
     

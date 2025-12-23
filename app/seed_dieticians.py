@@ -41,7 +41,7 @@ def seed_dieticians():
             return
         
         # Hash password
-        password = "admin123"  # Default password
+        password = "admin4321"  # Default password
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
         
         # Create admin user
@@ -56,7 +56,26 @@ def seed_dieticians():
         result = dieticians.insert_one(admin_user)
         print(f"Admin user created with ID: {result.inserted_id}")
         print(f"   Username: admin")
-        print(f"   Password: admin123")
+        print(f"   Password: admin4321")
+        
+        # Check if testuser exists
+        if dieticians.find_one({"username": "testuser"}):
+            print("Testuser already exists")
+            return
+        
+        # Create test user for checking filtering
+        test_user = {
+            "username": "testuser",
+            "password": hashed_password,
+            "email": "test@dietician.com",
+            "full_name": "Test Dietician",
+            "created_at": None
+        }
+        
+        result2 = dieticians.insert_one(test_user)
+        print(f"Testuser created with ID: {result2.inserted_id}")
+        print(f"   Username: testuser")
+        print(f"   Password: admin4321")
         
     except Exception as e:
         print(f"Error: {e}")
