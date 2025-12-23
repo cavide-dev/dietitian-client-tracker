@@ -631,8 +631,8 @@ QTextEdit:focus {
  * ====================================================
  */
 
-/* Main window background for login screen */
-LoginWindow {
+/* Main window background for login screen - use QMainWindow to be safe */
+QMainWindow {
     background-color: #F5F5F7;
 }
 
@@ -641,53 +641,75 @@ QWidget#card_login {
     background-color: #FFFFFF;
     border-radius: 12px;
     border: 1px solid #D1D1D6;
+    padding: 0px !important;
+    margin: 0px !important;
 }
 
-/* Label styling for login window */
-LoginWindow QLabel#label_title {
+/* Remove all label backgrounds inside card_login */
+QWidget#card_login QLabel {
+    background-color: transparent !important;
+    padding: 0px !important;
+    margin: 0px !important;
+    border: none !important;
+}
+
+/* Specific label styling inside card_login */
+QWidget#card_login QLabel#label_title {
     color: #1D1D1D;
+    font-size: 24px;
+    font-weight: bold;
 }
 
-LoginWindow QLabel#label_subtitle {
+QWidget#card_login QLabel#label_subtitle {
     color: #8E8E93;
+    font-size: 11px;
 }
 
-LoginWindow QLabel#label_username {
+QWidget#card_login QLabel#label_username {
     color: #1D1D1D;
+    font-size: 11px;
+    font-weight: 500;
 }
 
-LoginWindow QLabel#label_password {
+QWidget#card_login QLabel#label_password {
     color: #1D1D1D;
+    font-size: 11px;
+    font-weight: 500;
 }
 
-LoginWindow QLabel#label_no_account {
+QWidget#card_login QLabel#label_no_account {
     color: #8E8E93;
+    font-size: 11px;
 }
 
-/* Error message styling */
-LoginWindow QLabel#label_error {
+/* Error message styling - red by default */
+QWidget#card_login QLabel#label_error {
     color: #FF3B30;
+    font-size: 12px;
 }
 
-/* Success message styling (green) */
-LoginWindow QLabel#label_error[text*="✅"] {
+/* Success message styling (green) when contains ✅ */
+QWidget#card_login QLabel#label_error[text*="✅"] {
     color: #34C759;
 }
 
 /* Sign Up link button styling */
-LoginWindow QPushButton#btn_signup_link {
+QPushButton#btn_signup_link {
     background-color: transparent;
     color: #34C759;
     border: none;
     font-weight: bold;
     text-decoration: underline;
+    padding: 0px;
+    margin: 0px;
 }
 
-LoginWindow QPushButton#btn_signup_link:hover {
+QPushButton#btn_signup_link:hover {
     color: #2FBF52;
 }
 
-LoginWindow QPushButton#btn_signup_link:pressed {
+QPushButton#btn_signup_link:pressed {
     color: #2AA84A;
 }
+
 

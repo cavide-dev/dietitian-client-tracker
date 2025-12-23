@@ -24,7 +24,8 @@ class LoginController(QMainWindow):
         super(LoginController, self).__init__()
         
         # Load UI from login_window.ui
-        ui_path = os.path.join(os.path.dirname(__file__), "views", "login_window.ui")
+        # UI files are in app/views/ directory, so we go up one level (..)
+        ui_path = os.path.join(os.path.dirname(__file__), "..", "views", "login_window.ui")
         loadUi(ui_path, self)
         
         # Setup database connection

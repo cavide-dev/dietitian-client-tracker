@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QHeaderView, QMessageBox, QAbstractItemView, QDialog, QMenu, QLabel
 from PyQt5.QtGui import QColor
 from PyQt5.uic import loadUi
-from PyQt5.QtCore import Qt, QDate 
+from PyQt5.QtCore import Qt, QDate, QTimer
 from bson.objectid import ObjectId
 from datetime import datetime
 from app.database import get_database
@@ -46,13 +46,20 @@ class MainController(QMainWindow):
         self.trend_chart = None  # Will hold the chart widget
         self.empty_state_diet = None  # Will hold the empty state widget
         self.empty_state_measurements = None  # Will hold the empty state widget for measurements
+        
         # 3. Initial Setup
         # Show the dashboard page by default on startup.
         self.stackedWidget.setCurrentWidget(self.page_dashboard)
-        # Load dashboard data on startup
-        self.load_dashboard()
-        # Load the table data
-        self.load_clients_table()
+        
+        # Show placeholder "Loading..." immediately - don't block UI
+        self.label_total_clients.setText("Loading...")
+        self.label_total_measurements.setText("Loading...")
+        self.label_active_diets.setText("Loading...")
+        
+        # Load dashboard and clients table asynchronously (100ms delay)
+        # This ensures MainWindow opens immediately without freezing
+        QTimer.singleShot(100, self.load_dashboard)
+        QTimer.singleShot(150, self.load_clients_table)
         
         # --- 4. NAVIGATION BUTTONS (Menu Connections) ---
         self.btn_dashboard.clicked.connect(self.show_dashboard)
