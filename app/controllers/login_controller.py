@@ -5,12 +5,21 @@ Handles user authentication and login/signup logic
 
 from PyQt5.QtWidgets import QMainWindow, QMessageBox
 from PyQt5.uic import loadUi
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal, QObject
 from pymongo import MongoClient
+from dotenv import load_dotenv
 import hashlib
 import os
+import sys
+
+# Load environment variables from .env file
+load_dotenv()
 
 class LoginController(QMainWindow):
+    # Signal: Emitted when login is successful
+    # This allows run.py to know when user has logged in successfully
+    login_successful = pyqtSignal(dict)  # Emits user data
+    
     def __init__(self, db_connection_string=None):
         super(LoginController, self).__init__()
         
@@ -34,15 +43,22 @@ class LoginController(QMainWindow):
         
     def init_database(self, connection_string=None):
         """
-        Initialize MongoDB connection
+        Initialize MongoDB connection securely using .env file
         """
         try:
-            # Default connection string (update with your MongoDB connection)
+            # Get connection string from .env file
             if connection_string is None:
-                connection_string = "mongodb+srv://abdulkadirizmir:sifre123@cluster0.0fstc.mongodb.net/dietician_db?retryWrites=true&w=majority"
+                connection_string = os.getenv("MONGO_URI")
+                
+            # Check if MONGO_URI exists
+            if not connection_string:
+                print("ERROR: 'MONGO_URI' not found in .env file!")
+                self.label_error.setText("Configuration error: MONGO_URI not found")
+                self.db = None
+                return
             
             client = MongoClient(connection_string)
-            self.db = client['dietician_db']
+            self.db = client['diet_app']
             
             # Test connection
             self.db.command('ping')
@@ -98,8 +114,11 @@ class LoginController(QMainWindow):
             self.current_user = user
             self.label_error.setText("Login successful!")
             
-            # Emit signal or call main window
-            # For now, we'll close this window
+            # Emit signal to notify run.py that login was successful
+            # Send user data so main_window knows who's logged in
+            self.login_successful.emit(user)
+            
+            # Close this window
             self.close()
             
         except Exception as e:

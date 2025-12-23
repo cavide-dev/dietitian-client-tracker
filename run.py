@@ -1,40 +1,59 @@
 import sys
 from PyQt5.QtWidgets import QApplication
+from app.controllers.login_controller import LoginController
 from app.controllers.main_controller import MainController
 
 def main():
     """
     Application Entry Point
     -----------------------
-    Initializes the QApplication, creates the main controller,
-    and starts the event loop.
+    1. Load stylesheet
+    2. Show LoginController (ask user to login)
+    3. After successful login, show MainController (main app)
     """
     # 1. Create the Application instance (The Core Motor)
     app = QApplication(sys.argv)
     
     # 2. Load the Light Theme Stylesheet
     # ====================================================
-    # Neden bu 3 satır?
-    # - QSS dosyasını oku: open() ile light_theme.qss dosyasını açarız
-    # - read(): Dosyanın tüm içeriğini string olarak oku
-    # - setStyleSheet(qss): Tüm widget'lere bu stili uygula
-    # 
-    # Sonuç: Buttons yeşil, inputs taraflı border, tables professional görünür
+    # This stylesheet is used by ALL windows:
+    # - LoginController (login window)
+    # - MainController (main application)
     # ====================================================
     with open("assets/styles/light_theme.qss", "r", encoding="utf-8") as qss_file:
         qss = qss_file.read()
     app.setStyleSheet(qss)
     
-    # 3. Initialize the Main Controller (The Window)
-    main_window = MainController()
+    # 3. Create and Show LoginController
+    # ====================================================
+    # User must login first before seeing the main app
+    # ====================================================
+    login_window = LoginController()
+    login_window.resize(500, 600)
+    login_window.show()
     
-    # 4. Show the Window
-    # Without this call, the application would run in the background invisible
-    main_window.resize(1200, 700)
-    main_window.show()
+    # 4. Setup: When login is successful, show main app
+    # ====================================================
+    # LoginController emits 'login_successful' signal when user logs in
+    # We connect that signal to a function that creates MainController
+    # ====================================================
+    def on_login_success(user_data):
+        """
+        Called when user successfully logs in
+        user_data = {"username": "admin", "email": "...", ...}
+        """
+        # Create main window
+        main_window = MainController()
+        main_window.resize(1200, 700)
+        main_window.show()
+        
+        # TODO: Pass user_data to main_window if needed
+        # For now, we'll implement this later
+    
+    # Connect the signal
+    login_window.login_successful.connect(on_login_success)
     
     # 5. Start the Event Loop
-    # Ensures the application stays open until the user closes it
     sys.exit(app.exec_())
 
 if __name__ == "__main__":
