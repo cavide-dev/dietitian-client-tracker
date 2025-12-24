@@ -8,6 +8,8 @@ from app.database import get_database
 from app.views.measurement_dialog import MeasurementDialog
 from app.views.stats_card_widget import StatsCard, StatsCardContainer
 from app.views.chart_widget import TrendChart
+from app.views.edit_profile_dialog import EditProfileDialog
+from app.views.change_password_dialog import ChangePasswordDialog
 import os
 import sys
 import pymongo
@@ -86,6 +88,10 @@ class MainController(QMainWindow):
         
         # Logout button handler
         self.btn_logout.clicked.connect(self.handle_logout)
+        
+        # Settings buttons handlers
+        self.btn_edit_profile.clicked.connect(self.open_edit_profile_dialog)
+        self.btn_change_password.clicked.connect(self.open_change_password_dialog)
         
         # Double click the list
         self.tableWidget.cellDoubleClicked.connect(self.open_client_detail)
@@ -222,9 +228,15 @@ class MainController(QMainWindow):
             total_clients = self.db['clients'].count_documents(user_filter)
             self.label_total_clients.setText(str(total_clients))
             
+            # Update settings page labels too
+            self.label_total_clients_2.setText(f"Total Clients: {total_clients}")
+            
             # Total Measurements (only for current user's clients)
             total_measurements = self.db['measurements'].count_documents(user_filter)
             self.label_total_measurements.setText(str(total_measurements))
+            
+            # Update settings page labels too
+            self.label_total_measurements_2.setText(f"Total Measurements: {total_measurements}")
             
             # Active Diets (status = 'active' AND for current user only)
             diet_filter = {"status": "active"}
@@ -1656,6 +1668,20 @@ class MainController(QMainWindow):
         
         # Close the main window
         self.close()
+    
+    def open_edit_profile_dialog(self):
+        """Open Edit Profile dialog"""
+        dialog = EditProfileDialog(parent=self, user_data=self.current_user, db=self.db)
+        if dialog.exec_() == QDialog.Accepted:
+            # Update greeting and settings label after profile change
+            user_fullname = self.current_user.get("fullname", "User")
+            self.label_greeting.setText(f"Hi, {user_fullname}!")
+            self.label_current_user.setText(f"Logged in as: {user_fullname}")
+    
+    def open_change_password_dialog(self):
+        """Open Change Password dialog"""
+        dialog = ChangePasswordDialog(parent=self, user_data=self.current_user, db=self.db)
+        dialog.exec_()
 
 
 

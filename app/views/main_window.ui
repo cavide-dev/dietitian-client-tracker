@@ -172,9 +172,6 @@
           <property name="text">
            <string>Hi, User!</string>
           </property>
-          <property name="alignment">
-           <set>Qt::AlignLeft|Qt::AlignVCenter</set>
-          </property>
          </widget>
         </item>
         <item>
@@ -187,13 +184,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Dashboard</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignLeft|Qt::AlignVCenter</set>
-          </property>
-          <property name="margin">
-           <number>0</number>
+           <string> Dashboard</string>
           </property>
          </widget>
         </item>
@@ -1007,7 +998,7 @@
         <item row="1" column="0">
          <widget class="QGroupBox" name="groupBox_10">
           <property name="title">
-           <string>📊 DATA &amp;&amp; EXPORT</string>
+           <string>📊 DATA &amp; EXPORT</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_12">
            <item>
@@ -1041,6 +1032,9 @@
                <layout class="QHBoxLayout" name="horizontalLayout_7">
                 <item>
                  <widget class="QPushButton" name="btn_export_pdf">
+                  <property name="cursor">
+                   <cursorShape>PointingHandCursor</cursorShape>
+                  </property>
                   <property name="text">
                    <string>Export as PDF</string>
                   </property>
@@ -1048,6 +1042,9 @@
                 </item>
                 <item>
                  <widget class="QPushButton" name="btn_backup">
+                  <property name="cursor">
+                   <cursorShape>PointingHandCursor</cursorShape>
+                  </property>
                   <property name="text">
                    <string>Backup</string>
                   </property>
@@ -1087,6 +1084,9 @@
                 </item>
                 <item>
                  <widget class="QComboBox" name="combo_language">
+                  <property name="cursor">
+                   <cursorShape>PointingHandCursor</cursorShape>
+                  </property>
                   <item>
                    <property name="text">
                     <string>English</string>
@@ -1117,6 +1117,9 @@
                 </item>
                 <item>
                  <widget class="QComboBox" name="combo_theme">
+                  <property name="cursor">
+                   <cursorShape>PointingHandCursor</cursorShape>
+                  </property>
                   <item>
                    <property name="text">
                     <string>Light</string>
@@ -1178,6 +1181,9 @@
                  <layout class="QVBoxLayout" name="verticalLayout_13">
                   <item>
                    <widget class="QPushButton" name="btn_edit_profile">
+                    <property name="cursor">
+                     <cursorShape>PointingHandCursor</cursorShape>
+                    </property>
                     <property name="text">
                      <string>Edit Profile</string>
                     </property>
@@ -1185,6 +1191,9 @@
                   </item>
                   <item>
                    <widget class="QPushButton" name="btn_change_password">
+                    <property name="cursor">
+                     <cursorShape>PointingHandCursor</cursorShape>
+                    </property>
                     <property name="text">
                      <string>Change Password</string>
                     </property>
@@ -1192,6 +1201,9 @@
                   </item>
                   <item>
                    <widget class="QPushButton" name="btn_logout">
+                    <property name="cursor">
+                     <cursorShape>PointingHandCursor</cursorShape>
+                    </property>
                     <property name="text">
                      <string>Logout</string>
                     </property>
