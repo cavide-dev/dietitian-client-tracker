@@ -998,7 +998,7 @@
         <item row="1" column="0">
          <widget class="QGroupBox" name="groupBox_10">
           <property name="title">
-           <string>📊 DATA &amp; EXPORT</string>
+           <string>📊 DATA &amp;&amp; EXPORT</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_12">
            <item>
