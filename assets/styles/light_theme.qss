@@ -885,7 +885,7 @@ QLabel#label_dashboard_title {
 
 /* Level 3: Settings - Current User Label */
 QLabel#label_current_user {
-    color: #007AFF;  /* Apple Blue */
+    color: #FF9500 !important;  /* Apple Orange */
     font-size: 16px;
     font-weight: bold;
     margin-bottom: 15px;
@@ -1065,9 +1065,15 @@ QLabel#empty_state_measurements {
  */
 
 QTableWidget QTableCornerButton::section {
-    background-color: #F5F5F7;
+    background-color: #FFFFFF;  /* Same as table background */
     color: #1D1D1D;
-    border: none;
+    border: 1px solid #D1D1D6;
+    padding: 4px;
+}
+
+QTableWidget QTableCornerButton::section:hover {
+    background-color: #F5F5F7;  /* Header background color on hover */
+    cursor: pointer;
 }
 
 /* ====================================================
@@ -1110,6 +1116,11 @@ QFrame#frame_3 QLabel,
 QFrame#frame_4 QLabel {
     background-color: #F5F5F7;
     color: #1D1D1D;
+}
+
+/* Exception: label_current_user has custom orange color */
+QFrame#frame_2 QLabel#label_current_user {
+    color: #FF9500 !important;
 }
 
 QFrame#frame_2 QLabel#label_total_clients_2,

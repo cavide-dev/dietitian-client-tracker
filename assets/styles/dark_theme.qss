@@ -848,7 +848,7 @@ QPlainTextEdit#txt_notes {
  */
 
 QLabel#label_greeting {
-    color: #34C759;
+    color: #5B9EFF;
     font-size: 28px;
     font-weight: bold;
     margin-bottom: 8px;
@@ -1042,9 +1042,15 @@ QLabel#empty_state_measurements {
  */
 
 QTableWidget QTableCornerButton::section {
-    background-color: #1F1F1F;
+    background-color: #2A2A2A;  /* Same as table background */
     color: #E5E5E5;
-    border: none;
+    border: 1px solid #3A3A3A;
+    padding: 4px;
+}
+
+QTableWidget QTableCornerButton::section:hover {
+    background-color: #1F1F1F;  /* Header background color on hover */
+    cursor: pointer;
 }
 
 /* ====================================================
@@ -1087,6 +1093,11 @@ QFrame#frame_3 QLabel,
 QFrame#frame_4 QLabel {
     background-color: #2A2A2A;
     color: #E5E5E5;
+}
+
+/* Exception: label_current_user has custom color in dark theme */
+QFrame#frame_2 QLabel#label_current_user {
+    color: #E5E5E5 !important;  /* Keep light for dark theme */
 }
 
 QFrame#frame_2 QLabel#label_total_clients_2,
