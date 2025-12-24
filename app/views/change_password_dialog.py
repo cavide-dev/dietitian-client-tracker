@@ -23,9 +23,17 @@ class ChangePasswordDialog(QDialog):
         self.user_data = user_data
         self.db = db
         self.setWindowTitle("Change Password")
-        self.setGeometry(100, 100, 400, 250)
+        self.setGeometry(0, 0, 400, 250)
         
         self.init_ui()
+        
+        # Center dialog on parent window
+        if parent:
+            parent_geo = parent.frameGeometry()
+            self.move(
+                parent_geo.center().x() - self.width() // 2,
+                parent_geo.center().y() - self.height() // 2
+            )
     
     def init_ui(self):
         layout = QVBoxLayout()
