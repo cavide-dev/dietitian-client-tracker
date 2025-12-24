@@ -225,6 +225,17 @@ QLabel#SubtitleLabel {
     font-size: 12px;
 }
 
+/* Form Labels - Add Client / Edit Client */
+QLabel#label_name,
+QLabel#label_phone,
+QLabel#label_birth_date {
+    background-color: #F5F5F7;
+    color: #1D1D1D;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
 /* ====================================================
  * TABLES (QTableWidget) - Clean Minimal Design
  * ====================================================
