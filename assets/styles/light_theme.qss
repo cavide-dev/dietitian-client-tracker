@@ -859,7 +859,7 @@ QPlainTextEdit#txt_notes {
 
 /* Level 1: Greeting - Largest, Most Prominent */
 QLabel#label_greeting {
-    color: #1D1D1D;
+    color: #007AFF;  /* Apple Blue */
     font-size: 28px;
     font-weight: bold;
     margin-bottom: 10px;
@@ -872,6 +872,14 @@ QLabel#label_dashboard_title {
     font-weight: bold;
     margin-top: 15px;
     margin-bottom: 10px;
+}
+
+/* Level 3: Settings - Current User Label */
+QLabel#label_current_user {
+    color: #007AFF;  /* Apple Blue */
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 15px;
 }
 
 /* ====================================================

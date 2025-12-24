@@ -50,14 +50,13 @@ def main():
         # Hide login window after successful login
         login_window.hide()
         
-        # When main window closes, show login window again (for logout)
-        def on_main_window_closed():
+        # When logout happens, show login window again
+        def on_logout():
             login_window.show()
-            # Reset login form for next user
             login_window.input_username.setText("")
             login_window.input_password.setText("")
         
-        main_window.destroyed.connect(on_main_window_closed)
+        main_window.logout_signal.connect(on_logout)
     
     # Connect the signal
     login_window.login_successful.connect(on_login_success)

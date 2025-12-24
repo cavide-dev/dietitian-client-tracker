@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QHeaderView, QMessageBox, QAbstractItemView, QDialog, QMenu, QLabel
 from PyQt5.QtGui import QColor
 from PyQt5.uic import loadUi
-from PyQt5.QtCore import Qt, QDate, QTimer
+from PyQt5.QtCore import Qt, QDate, QTimer, pyqtSignal
 from bson.objectid import ObjectId
 from datetime import datetime
 from app.database import get_database
@@ -11,7 +11,11 @@ from app.views.chart_widget import TrendChart
 import os
 import sys
 import pymongo
+
 class MainController(QMainWindow):
+    # Signal emitted when user logs out
+    logout_signal = pyqtSignal()
+    
     def __init__(self, current_user=None):
         """
         Main Application Logic.
@@ -1647,10 +1651,11 @@ class MainController(QMainWindow):
         # Clear current user data
         self.current_user = None
         
+        # Emit logout signal so run.py can show login window
+        self.logout_signal.emit()
+        
         # Close the main window
         self.close()
-        
-        # The login window will appear automatically (run.py handles this)
 
 
 

@@ -93,6 +93,7 @@ class LoginController(QMainWindow):
         # Validation
         if not username or not password:
             self.label_error.setText("Please enter username and password")
+            self.label_error.setStyleSheet("color: #FF3B30; font-weight: bold;")
             return
         
         if self.db is None:
@@ -105,18 +106,21 @@ class LoginController(QMainWindow):
             user = dieticians.find_one({"username": username})
             
             if not user:
-                self.label_error.setText("Username not found")
+                self.label_error.setText("Invalid password or username")
+                self.label_error.setStyleSheet("color: #FF3B30; font-weight: bold;")
                 return
             
             # Check password
             hashed_password = self.hash_password(password)
             if user['password'] != hashed_password:
-                self.label_error.setText("Invalid password")
+                self.label_error.setText("Invalid password or username")
+                self.label_error.setStyleSheet("color: #FF3B30; font-weight: bold;")
                 return
             
             # Login successful! 
             self.current_user = user
             self.label_error.setText("Login successful!")
+            self.label_error.setStyleSheet("color: #34C759; font-weight: bold;")
             
             # Emit signal to notify run.py that login was successful
             # Send user data so main_window knows who's logged in
