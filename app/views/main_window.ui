@@ -809,7 +809,7 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>728</width>
+                 <width>304</width>
                  <height>852</height>
                 </rect>
                </property>
@@ -995,64 +995,181 @@
       </widget>
       <widget class="QWidget" name="page_settings">
        <layout class="QGridLayout" name="gridLayout_2">
-        <item row="3" column="1">
-         <spacer name="verticalSpacer_3">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
+        <item row="1" column="0">
+         <widget class="QGroupBox" name="groupBox_10">
+          <property name="title">
+           <string>📊 DATA &amp; EXPORT</string>
           </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>61</height>
-           </size>
-          </property>
-         </spacer>
+          <layout class="QVBoxLayout" name="verticalLayout_12">
+           <item>
+            <widget class="QFrame" name="frame_3">
+             <property name="frameShape">
+              <enum>QFrame::StyledPanel</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_15">
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_11">
+                <item>
+                 <widget class="QLabel" name="label_total_clients_2">
+                  <property name="text">
+                   <string>Total Clients: 5</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_total_measurements_2">
+                  <property name="text">
+                   <string>Total Measurements: 12</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_7">
+                <item>
+                 <widget class="QPushButton" name="btn_export_pdf">
+                  <property name="text">
+                   <string>Export as PDF</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="btn_backup">
+                  <property name="text">
+                   <string>Backup</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
         </item>
-        <item row="0" column="1">
-         <spacer name="verticalSpacer_4">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
+        <item row="1" column="1">
+         <widget class="QGroupBox" name="groupBox_9">
+          <property name="title">
+           <string>🌍 PREFERENCES</string>
           </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>62</height>
-           </size>
-          </property>
-         </spacer>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <item>
+            <widget class="QFrame" name="frame_4">
+             <property name="frameShape">
+              <enum>QFrame::StyledPanel</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_16">
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_4">
+                <item>
+                 <widget class="QLabel" name="label">
+                  <property name="text">
+                   <string>🌐 Language:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="combo_language">
+                  <item>
+                   <property name="text">
+                    <string>English</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Türkçe</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>한국어</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_5">
+                <item>
+                 <widget class="QLabel" name="label_2">
+                  <property name="text">
+                   <string>🎨 Theme:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="combo_theme">
+                  <item>
+                   <property name="text">
+                    <string>Light</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Dark</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
         </item>
-        <item row="1" column="1" rowspan="2">
-         <layout class="QVBoxLayout" name="verticalLayout_13">
-          <item>
-           <widget class="QLabel" name="label_settings_title">
-            <property name="font">
-             <font>
-              <pointsize>11</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>SETTINGS</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="group_profile">
-            <property name="title">
-             <string>PROFILE</string>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item row="0" column="0" colspan="2">
+         <widget class="QGroupBox" name="group_profile">
+          <property name="title">
+           <string>👤 PROFILE</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_4">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
              <item>
-              <widget class="QLabel" name="label_current_user">
-               <property name="text">
-                <string>Logged in as: John Smith</string>
+              <widget class="QFrame" name="frame_2">
+               <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
                </property>
+               <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_14">
+                <item>
+                 <widget class="QLabel" name="label_current_user">
+                  <property name="text">
+                   <string>Logged in as: John Smith</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </widget>
              </item>
              <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_3">
+              <spacer name="horizontalSpacer">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_13">
                <item>
                 <widget class="QPushButton" name="btn_edit_profile">
                  <property name="text">
@@ -1067,132 +1184,6 @@
                  </property>
                 </widget>
                </item>
-              </layout>
-             </item>
-             <item>
-              <widget class="QGroupBox" name="groupBox_9">
-               <property name="title">
-                <string>PREFERENCES</string>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout_5">
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_4">
-                  <item>
-                   <widget class="QLabel" name="label">
-                    <property name="text">
-                     <string>🌐 Language:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QComboBox" name="combo_language">
-                    <item>
-                     <property name="text">
-                      <string>English</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>Türkçe</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>한국어</string>
-                     </property>
-                    </item>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_5">
-                  <item>
-                   <widget class="QLabel" name="label_2">
-                    <property name="text">
-                     <string>🎨 Theme:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QComboBox" name="combo_theme">
-                    <item>
-                     <property name="text">
-                      <string>Light</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>Dark</string>
-                     </property>
-                    </item>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
-              <widget class="QGroupBox" name="groupBox_10">
-               <property name="title">
-                <string>📊 DATA &amp; EXPORT</string>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout_12">
-                <item>
-                 <layout class="QVBoxLayout" name="verticalLayout_11">
-                  <item>
-                   <widget class="QLabel" name="label_total_clients_2">
-                    <property name="text">
-                     <string>Total Clients: 5</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="label_total_measurements_2">
-                    <property name="text">
-                     <string>Total Measurements: 12</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_7">
-                  <item>
-                   <widget class="QPushButton" name="btn_export_pdf">
-                    <property name="text">
-                     <string>Export as PDF</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="btn_backup">
-                    <property name="text">
-                     <string>Backup</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
-              <spacer name="verticalSpacer_2">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>118</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_8">
                <item>
                 <widget class="QPushButton" name="btn_logout">
                  <property name="text">
@@ -1200,51 +1191,12 @@
                  </property>
                 </widget>
                </item>
-               <item>
-                <spacer name="horizontalSpacer">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>40</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
               </layout>
              </item>
             </layout>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item row="1" column="2">
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="1" column="0">
-         <spacer name="horizontalSpacer_3">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
+           </item>
+          </layout>
+         </widget>
         </item>
        </layout>
       </widget>

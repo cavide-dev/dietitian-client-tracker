@@ -874,4 +874,86 @@ QLabel#label_dashboard_title {
     margin-bottom: 10px;
 }
 
+/* ====================================================
+ * SETTINGS PAGE STYLING
+ * ====================================================
+ */
+
+/* QFrame styling - Settings page frames ONLY (frame_2, frame_3, frame_4) */
+QFrame#frame_2,
+QFrame#frame_3,
+QFrame#frame_4 {
+    background-color: #F5F5F7;  /* Light gray background */
+    border: 1px solid #E5E5EA;  /* Subtle border */
+    border-radius: 8px;          /* Yumuşak köşeler */
+    padding: 10px;               /* İçerik padding */
+}
+
+/* QGroupBox styling - Settings sayfası grupları */
+QGroupBox {
+    color: #1D1D1D;
+    font-weight: bold;
+    font-size: 13px;
+    border: none;  /* Çerçeve yok, frame'ler işi yapacak */
+    margin-top: 15px;   /* Üst boşluk */
+    margin-bottom: 15px; /* Alt boşluk */
+    padding-top: 10px;
+}
+
+/* Logout button - WARNING COLOR (Kırmızı) */
+QPushButton#btn_logout {
+    background-color: #FF3B30;      /* Apple Red */
+    color: #FFFFFF;                 /* White text */
+    border-radius: 6px;             /* Rounded corners */
+    padding: 8px 16px;              /* Padding */
+    font-weight: bold;
+    border: none;
+}
+
+QPushButton#btn_logout:hover {
+    background-color: #FF453A;      /* Lighter red on hover */
+}
+
+QPushButton#btn_logout:pressed {
+    background-color: #E83B2D;      /* Darker red when clicked */
+}
+
+/* ComboBox styling - Language & Theme dropdowns */
+QComboBox {
+    background-color: #FFFFFF;
+    color: #1D1D1D;
+    border: 1px solid #E5E5EA;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+QComboBox:focus {
+    border: 2px solid #34C759;  /* Green border when focused */
+}
+
+QComboBox::drop-down {
+    border: none;
+    width: 30px;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #FFFFFF;
+    color: #1D1D1D;
+    border: 1px solid #E5E5EA;
+    border-radius: 6px;
+    selection-background-color: #007AFF;  /* Apple Blue */
+    selection-color: #FFFFFF;
+    padding: 5px;
+}
+
+QComboBox QAbstractItemView::item:hover {
+    background-color: #F5F5F7;  /* Light gray hover */
+}
+
+QComboBox QAbstractItemView::item:selected {
+    background-color: #007AFF;  /* Apple Blue selected */
+    color: #FFFFFF;
+}
+
 

@@ -61,6 +61,9 @@ class MainController(QMainWindow):
         user_fullname = self.current_user.get("fullname", "User") if self.current_user else "User"
         self.label_greeting.setText(f"Hi, {user_fullname}!")
         
+        # Set settings page - current user label
+        self.label_current_user.setText(f"Logged in as: {user_fullname}")
+        
         # Show placeholder "Loading..." immediately - don't block UI
         self.label_total_clients.setText("Loading...")
         self.label_total_measurements.setText("Loading...")
@@ -76,6 +79,10 @@ class MainController(QMainWindow):
         self.btn_clients.clicked.connect(lambda: self.stackedWidget.setCurrentWidget(self.page_clients))
         self.btn_diet_plans.clicked.connect(self.switch_to_diet_page)
         self.btn_settings.clicked.connect(lambda: self.stackedWidget.setCurrentWidget(self.page_settings))
+        
+        # Logout button handler
+        self.btn_logout.clicked.connect(self.handle_logout)
+        
         # Double click the list
         self.tableWidget.cellDoubleClicked.connect(self.open_client_detail)
         # Back to list
@@ -1631,6 +1638,19 @@ class MainController(QMainWindow):
             return dt.strptime(date_value, '%Y-%m-%d').date()
         else:
             return date_value
+
+    def handle_logout(self):
+        """
+        Logout handler - closes main window and returns to login
+        Clears current user data for security (shared device scenarios)
+        """
+        # Clear current user data
+        self.current_user = None
+        
+        # Close the main window
+        self.close()
+        
+        # The login window will appear automatically (run.py handles this)
 
 
 
