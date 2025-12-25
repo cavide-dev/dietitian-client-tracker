@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QFormLayout, QDialogButtonBox, 
                              QLabel, QDoubleSpinBox, QDateEdit, QTextEdit, QMessageBox)
 from PyQt5.QtCore import Qt, QDate
+from app.services.validation_service import ValidationService
 
 class MeasurementDialog(QDialog):
     """
@@ -148,6 +149,7 @@ class MeasurementDialog(QDialog):
     def validate_measurements(self):
         """
         Validate measurement values for sensible ranges.
+        Uses ValidationService for centralized validation.
         
         Returns:
             tuple: (is_valid, error_message)
@@ -156,19 +158,12 @@ class MeasurementDialog(QDialog):
         weight = self.input_weight.value()
         body_fat = self.input_fat.value()
         
-        # Height validation: 100-250 cm (reasonable human range)
-        if height < 100 or height > 250:
-            return False, "Height must be between 100-250 cm"
+        # Use ValidationService for main measurements
+        is_valid, error_msg = ValidationService.validate_measurement_values(height, weight, body_fat)
+        if not is_valid:
+            return False, error_msg
         
-        # Weight validation: 20-500 kg
-        if weight < 20 or weight > 500:
-            return False, "Weight must be between 20-500 kg"
-        
-        # Body fat: 0-100%
-        if body_fat < 0 or body_fat > 100:
-            return False, "Body fat must be between 0-100%"
-        
-        # Waist, Hip, Chest, Arm, Thigh circumferences (5-150 cm)
+        # Circumferences validation (5-150 cm) - specific to this dialog
         circumferences = {
             "Waist": self.input_waist.value(),
             "Hip": self.input_hip.value(),

@@ -8,6 +8,8 @@ from PyQt5.QtWidgets import (
     QPushButton, QMessageBox
 )
 from PyQt5.QtCore import Qt
+from app.services.validation_service import ValidationService
+from app.services.auth_service import AuthService
 
 
 class EditProfileDialog(QDialog):
@@ -70,39 +72,33 @@ class EditProfileDialog(QDialog):
     
     def save_changes(self):
         """Save updated profile to database"""
-        import re
         
         fullname = self.input_fullname.text().strip()
         email = self.input_email.text().strip()
         
-        # Validation
-        if not fullname:
-            QMessageBox.warning(self, "Validation Error", "Full name cannot be empty")
+        # Validate fullname using ValidationService
+        is_valid_fullname, fullname_error = ValidationService.validate_fullname(fullname)
+        if not is_valid_fullname:
+            QMessageBox.warning(self, "Validation Error", fullname_error)
             return
         
-        if not email:
-            QMessageBox.warning(self, "Validation Error", "Email cannot be empty")
-            return
-        
-        # Validate email format
-        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-        if not re.match(email_pattern, email):
-            QMessageBox.warning(self, "Validation Error", "Invalid email format")
+        # Validate email using ValidationService
+        is_valid_email, email_error = ValidationService.validate_email(email)
+        if not is_valid_email:
+            QMessageBox.warning(self, "Validation Error", email_error)
             return
         
         try:
-            # Update in database
+            # Use AuthService to update profile (REFACTORED)
             username = self.user_data.get("username")
-            self.db['dieticians'].update_one(
-                {"username": username},
-                {"$set": {"fullname": fullname, "email": email}}
+            success, message = AuthService.update_user_profile(
+                self.db, username, fullname, email, self.user_data
             )
             
-            # Update local user_data
-            self.user_data["fullname"] = fullname
-            self.user_data["email"] = email
-            
-            QMessageBox.information(self, "Success", "Profile updated successfully!")
-            self.accept()
+            if success:
+                QMessageBox.information(self, "Success", message)
+                self.accept()
+            else:
+                QMessageBox.critical(self, "Error", message)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to update profile: {str(e)}")

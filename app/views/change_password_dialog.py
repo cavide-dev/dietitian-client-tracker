@@ -8,7 +8,8 @@ from PyQt5.QtWidgets import (
     QPushButton, QMessageBox
 )
 from PyQt5.QtCore import Qt
-import hashlib
+from app.services.validation_service import ValidationService
+from app.services.auth_service import AuthService
 
 
 class ChangePasswordDialog(QDialog):
@@ -71,27 +72,20 @@ class ChangePasswordDialog(QDialog):
         layout.addLayout(button_layout)
         self.setLayout(layout)
     
-    def hash_password(self, password):
-        """Hash password using SHA256"""
-        return hashlib.sha256(password.encode()).hexdigest()
-    
     def change_password(self):
         """Validate and update password in database"""
         current_pass = self.input_current.text()
         new_pass = self.input_new.text()
         confirm_pass = self.input_confirm.text()
         
-        # Validation
+        # Validation using ValidationService
         if not current_pass:
             QMessageBox.warning(self, "Validation Error", "Current password is required")
             return
         
-        if not new_pass or not confirm_pass:
-            QMessageBox.warning(self, "Validation Error", "New password cannot be empty")
-            return
-        
-        if len(new_pass) < 6:
-            QMessageBox.warning(self, "Validation Error", "Password must be at least 6 characters")
+        is_valid_password, password_error = ValidationService.validate_password(new_pass, min_length=6)
+        if not is_valid_password:
+            QMessageBox.warning(self, "Validation Error", password_error)
             return
         
         if new_pass != confirm_pass:
@@ -99,26 +93,16 @@ class ChangePasswordDialog(QDialog):
             return
         
         try:
-            # Verify current password
+            # Use AuthService to change password (REFACTORED)
             username = self.user_data.get("username")
-            user = self.db['dieticians'].find_one({"username": username})
-            
-            hashed_current = self.hash_password(current_pass)
-            if user['password'] != hashed_current:
-                QMessageBox.warning(self, "Error", "Current password is incorrect")
-                return
-            
-            # Update password in database
-            hashed_new = self.hash_password(new_pass)
-            self.db['dieticians'].update_one(
-                {"username": username},
-                {"$set": {"password": hashed_new}}
+            success, message = AuthService.change_user_password(
+                self.db, username, current_pass, new_pass, self.user_data
             )
             
-            # Update local user_data
-            self.user_data["password"] = hashed_new
-            
-            QMessageBox.information(self, "Success", "Password changed successfully!")
-            self.accept()
+            if success:
+                QMessageBox.information(self, "Success", message)
+                self.accept()
+            else:
+                QMessageBox.warning(self, "Error", message)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to change password: {str(e)}")

@@ -8,6 +8,7 @@ from PyQt5.uic import loadUi
 from PyQt5.QtCore import Qt, pyqtSignal
 from pymongo import MongoClient
 from dotenv import load_dotenv
+from app.services.validation_service import ValidationService
 import hashlib
 import re
 import os
@@ -95,25 +96,29 @@ class SignupController(QMainWindow):
         # Clear previous error
         self.label_error.setText("")
         
-        # Validation
+        # Validation using ValidationService
         if not fullname or not email or not username or not password or not confirm_password:
             self.label_error.setText("All fields are required")
             return
         
-        if len(fullname) < 3:
-            self.label_error.setText("Full name must be at least 3 characters")
+        is_valid_fullname, fullname_error = ValidationService.validate_fullname(fullname, min_length=3)
+        if not is_valid_fullname:
+            self.label_error.setText(fullname_error)
             return
         
-        if not self.validate_email(email):
-            self.label_error.setText("Invalid email format")
+        is_valid_email, email_error = ValidationService.validate_email(email)
+        if not is_valid_email:
+            self.label_error.setText(email_error)
             return
         
-        if len(username) < 3:
-            self.label_error.setText("Username must be at least 3 characters")
+        is_valid_username, username_error = ValidationService.validate_username(username, min_length=3)
+        if not is_valid_username:
+            self.label_error.setText(username_error)
             return
         
-        if len(password) < 6:
-            self.label_error.setText("Password must be at least 6 characters")
+        is_valid_password, password_error = ValidationService.validate_password(password, min_length=6)
+        if not is_valid_password:
+            self.label_error.setText(password_error)
             return
         
         if password != confirm_password:
