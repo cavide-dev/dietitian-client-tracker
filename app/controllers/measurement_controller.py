@@ -44,17 +44,41 @@ class MeasurementController:
             self.main.table_measurements.setRowCount(len(measurements))
 
             for row_index, measurement in enumerate(measurements):
-                # Date
-                date_item = QTableWidgetItem(str(measurement.get('date', '-')))
+                # Date - Format properly
+                date_val = measurement.get('date', '-')
+                if isinstance(date_val, str):
+                    # If it's already a string, try to extract just the date part
+                    date_str = date_val.split('T')[0] if 'T' in date_val else date_val
+                else:
+                    # If it's a datetime object, format it
+                    date_str = date_val.strftime('%Y-%m-%d') if hasattr(date_val, 'strftime') else str(date_val)
+                
+                date_item = QTableWidgetItem(date_str)
                 self.main.table_measurements.setItem(row_index, 0, date_item)
 
                 # Weight
                 weight_item = QTableWidgetItem(str(measurement.get('weight', '-')))
                 self.main.table_measurements.setItem(row_index, 1, weight_item)
 
+                # Waist
+                waist_item = QTableWidgetItem(str(measurement.get('waist', '-')))
+                self.main.table_measurements.setItem(row_index, 2, waist_item)
+
                 # Body Fat
                 fat_item = QTableWidgetItem(str(measurement.get('body_fat_ratio', '-')))
-                self.main.table_measurements.setItem(row_index, 2, fat_item)
+                self.main.table_measurements.setItem(row_index, 3, fat_item)
+
+                # Muscle Mass
+                muscle_item = QTableWidgetItem(str(measurement.get('muscle_mass', '-')))
+                self.main.table_measurements.setItem(row_index, 4, muscle_item)
+
+                # Metabolic Age
+                metabolic_item = QTableWidgetItem(str(measurement.get('metabolic_age', '-')))
+                self.main.table_measurements.setItem(row_index, 5, metabolic_item)
+
+                # BMR
+                bmr_item = QTableWidgetItem(str(measurement.get('bmr', '-')))
+                self.main.table_measurements.setItem(row_index, 6, bmr_item)
 
         except Exception as e:
             print(f"Error loading measurements: {e}")
@@ -201,7 +225,7 @@ class MeasurementController:
         dialog = MeasurementDialog(self.main)
         
         if dialog.exec_():
-            data = dialog.get_form_data()
+            data = dialog.get_data()
             if self.add_measurement_entry(self.main.current_client_id, data):
                 QMessageBox.information(self.main, "Success", "Measurement added successfully!")
                 self.load_client_measurements()
@@ -222,7 +246,7 @@ class MeasurementController:
             dialog = MeasurementDialog(self.main, measurement_data=measurement)
             
             if dialog.exec_():
-                data = dialog.get_form_data()
+                data = dialog.get_data()
                 try:
                     self.main.db['measurements'].update_one(
                         {'_id': measurement['_id']},

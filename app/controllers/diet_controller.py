@@ -3,7 +3,7 @@ DietController - Manages all diet plan operations.
 Responsible for: CRUD operations, listing, and management of diet plans.
 """
 
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem
 from datetime import datetime
 from app.services.validation_service import ValidationService
 
@@ -158,29 +158,51 @@ class DietController:
     def load_client_diet_plans(self):
         """
         Fetch and display diet plans for selected client.
+        Sorted by creation date (newest first).
+        (Status handling is automatic: newest diet is "active", older ones are "passive")
         """
         if not self.main.current_client_id or self.main.db is None:
             self.main.show_diet_empty_state()
             return
 
         try:
-            diets = list(self.main.db['diet_plans'].find({"client_id": self.main.current_client_id}))
+            # Sort by creation date - newest first
+            diets = list(self.main.db['diet_plans'].find(
+                {"client_id": self.main.current_client_id}
+            ).sort("created_at", -1))
             
             if not diets:
                 self.main.show_diet_empty_state()
                 return
 
             self.main.hide_diet_empty_state()
-            self.main.table_diets.setRowCount(len(diets))
+            self.main.table_diet_history.setRowCount(len(diets))
 
             for row_index, diet in enumerate(diets):
-                title_item = self.main.table_diets.item(row_index, 0)
-                if not title_item:
-                    from PyQt5.QtWidgets import QTableWidgetItem
-                    title_item = QTableWidgetItem(diet.get('title', '-'))
-                    self.main.table_diets.setItem(row_index, 0, title_item)
+                # Date - Format properly
+                date_val = diet.get('created_at', '-')
+                if isinstance(date_val, str):
+                    # If it's already a string, try to extract just the date part
+                    date_str = date_val.split('T')[0] if 'T' in date_val else date_val
                 else:
-                    title_item.setText(diet.get('title', '-'))
+                    # If it's a datetime object, format it
+                    date_str = date_val.strftime('%Y-%m-%d') if hasattr(date_val, 'strftime') else str(date_val)
+                
+                date_item = QTableWidgetItem(date_str)
+                self.main.table_diet_history.setItem(row_index, 0, date_item)
+
+                # Diet Name / Title
+                title_item = QTableWidgetItem(diet.get('title', '-'))
+                self.main.table_diet_history.setItem(row_index, 1, title_item)
+
+                # Status with QLabel for QSS styling
+                status = diet.get('status', 'active').lower()
+                from PyQt5.QtWidgets import QLabel
+                from PyQt5.QtCore import Qt
+                status_label = QLabel(status.capitalize())
+                status_label.setProperty("status_type", status)
+                status_label.setAlignment(Qt.AlignCenter)
+                self.main.table_diet_history.setCellWidget(row_index, 2, status_label)
 
         except Exception as e:
             print(f"Error loading diet plans: {e}")
@@ -217,6 +239,9 @@ class DietController:
                     client.get('full_name', 'Unknown'),
                     str(client.get('_id'))
                 )
+            
+            # Reset to placeholder
+            self.main.cmb_client_select.setCurrentIndex(0)
 
         except Exception as e:
             print(f"Error loading clients dropdown: {e}")

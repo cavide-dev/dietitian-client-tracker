@@ -182,14 +182,7 @@ class MeasurementDialog(QDialog):
         """
         Collects ALL data from input fields and returns a dictionary.
         This dictionary matches the MongoDB document structure.
-        Includes validation of measurement values.
         """
-        # Validate before returning
-        is_valid, error_msg = self.validate_measurements()
-        if not is_valid:
-            QMessageBox.warning(self, "Validation Error", error_msg)
-            return None
-        
         return {
             "date": self.input_date.date().toPyDate().strftime("%Y-%m-%d"),
             

@@ -152,8 +152,9 @@ class MainController(QMainWindow):
             self.btn_delete_diet.clicked.connect(self.diet_controller.delete_diet_plan)
         
         # --- THEME SWITCHER ---
-        self.combo_theme.currentIndexChanged.connect(self.on_theme_changed)
+        # Load theme preference FIRST, then connect signal
         self.load_theme_preference()
+        self.combo_theme.currentIndexChanged.connect(self.on_theme_changed)
         
         # --- Default View Settings ---
         self.stack_diet_sub.setCurrentIndex(0)
@@ -367,17 +368,16 @@ class MainController(QMainWindow):
         self.date_birth_add.setCalendarPopup(True)
 
         # --- Diet History Table: Column Layout ---
-        header = self.table_diet_history.horizontalHeader()
-
-        # Make all columns share the available width evenly
-        header.setSectionResizeMode(QHeaderView.Stretch)
-
-        # Ensure the last column expands to fill any remaining space
-        header.setStretchLastSection(True)
-
-        # --- Table Appearance Improvements ---
-        # Hide the row index column (cleaner look)
+        diet_header = self.table_diet_history.horizontalHeader()
+        diet_header.setSectionResizeMode(QHeaderView.Stretch)
+        diet_header.setStretchLastSection(True)
         self.table_diet_history.verticalHeader().setVisible(False)
+
+        # --- Measurement Table: Column Layout ---
+        measurement_header = self.table_measurements.horizontalHeader()
+        measurement_header.setSectionResizeMode(QHeaderView.Stretch)
+        measurement_header.setStretchLastSection(True)
+        self.table_measurements.verticalHeader().setVisible(False)
 
         # Enable alternating row colors for better readability
         self.table_diet_history.setAlternatingRowColors(True)
@@ -489,12 +489,13 @@ class MainController(QMainWindow):
                 # Default to Light theme
                 theme = "Light"
             
-            # Set combo_theme to saved theme
+            # Apply theme first
+            self.apply_theme(theme)
+            
+            # THEN set combo_theme to match
             index = self.combo_theme.findText(theme)
             if index >= 0:
                 self.combo_theme.setCurrentIndex(index)
-            else:
-                self.apply_theme("Light")
                 
         except Exception as e:
             print(f"Error loading theme preference: {e}")
@@ -522,12 +523,18 @@ class MainController(QMainWindow):
             qss_file = None
             
             if theme_name == "Dark":
-                qss_file = "assets/styles/dark_theme.qss"
+                qss_file = "dark_theme.qss"
             else:
-                qss_file = "assets/styles/light_theme.qss"
+                qss_file = "light_theme.qss"
+            
+            # Get absolute path to QSS file - go up TWO levels (controllers -> app -> root)
+            styles_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'assets', 'styles', qss_file)
+            styles_dir = os.path.normpath(os.path.abspath(styles_dir))
+            
+            print(f"Loading theme file: {styles_dir}")
             
             # Read QSS file
-            with open(qss_file, encoding="utf-8") as f:
+            with open(styles_dir, encoding="utf-8") as f:
                 qss_content = f.read()
             
             # Apply stylesheet to entire application
@@ -541,12 +548,13 @@ class MainController(QMainWindow):
             if self.trend_chart is not None:
                 self.trend_chart.apply_theme(theme_name)
             
-            print(f"Theme changed to: {theme_name}")
+            print(f"✓ Theme changed to: {theme_name}")
             
         except FileNotFoundError as e:
-            print(f"Error: Theme file not found - {e}")
+            print(f"✗ Error: Theme file not found - {e}")
+            print(f"  Looked for file at: {styles_dir}")
         except Exception as e:
-            print(f"Error applying theme: {e}")
+            print(f"✗ Error applying theme: {e}")
 
     def handle_diet_save(self):
         """

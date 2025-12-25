@@ -38,10 +38,10 @@ class ValidationService:
         phone = phone.strip()
         
         if not phone:
-            return False, "Telefon numarası boş olamaz"
+            return False, "Phone number cannot be empty"
         
         if not ValidationService.PHONE_PATTERN.match(phone):
-            return False, "Telefon numarası 7-15 rakam olmalıdır"
+            return False, "Phone number must be 7-15 digits"
         
         return True, ""
 
@@ -130,7 +130,7 @@ class ValidationService:
             if height < ValidationService.HEIGHT_MIN or height > ValidationService.HEIGHT_MAX:
                 return (
                     False,
-                    f"Boy {ValidationService.HEIGHT_MIN}-{ValidationService.HEIGHT_MAX} cm arasında olmalıdır",
+                    f"Height must be between {ValidationService.HEIGHT_MIN}-{ValidationService.HEIGHT_MAX} cm arasında olmalıdır",
                 )
         
         # Weight validation (allow 0)
@@ -138,7 +138,7 @@ class ValidationService:
             if weight < ValidationService.WEIGHT_MIN or weight > ValidationService.WEIGHT_MAX:
                 return (
                     False,
-                    f"Kilo {ValidationService.WEIGHT_MIN}-{ValidationService.WEIGHT_MAX} kg arasında olmalıdır",
+                    f"Weight must be between {ValidationService.WEIGHT_MIN}-{ValidationService.WEIGHT_MAX} kg arasında olmalıdır",
                 )
         
         # Body fat validation
@@ -284,7 +284,7 @@ class ValidationService:
             return False, "Ad Soyad boş olamaz"
         
         if len(fullname) < min_length:
-            return False, f"Ad Soyad en az {min_length} karakter olmalıdır"
+            return False, f"Full name must be at least {min_length} karakter olmalıdır"
         
         return True, ""
 
