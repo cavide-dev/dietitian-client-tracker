@@ -1440,37 +1440,16 @@ class MainController(QMainWindow):
                 
                 # --- Create Cells (Items) ---
                 
-                # Determine row color based on status and theme
-                if status.lower() == "active":
-                    # Apple-style blue that matches the theme
-                    if self.current_theme == "Dark":
-                        bg_color = QColor(10, 132, 255)  # Dark theme blue #0A84FF
-                    else:
-                        bg_color = QColor(0, 122, 255)   # Light theme blue #007AFF
-                    text_color = QColor(255, 255, 255)  # White text for blue background
-                else:  # Archived/Passive - no special color, use default
-                    bg_color = None
-                    text_color = None
-
                 # Column 0: Date
                 date_item = QTableWidgetItem(date_str)
-                if bg_color:
-                    date_item.setBackground(bg_color)
-                    date_item.setForeground(text_color)
                 self.table_diet_history.setItem(row_position, 0, date_item)
                 
                 # Column 1: Title
                 title_item = QTableWidgetItem(title)
-                if bg_color:
-                    title_item.setBackground(bg_color)
-                    title_item.setForeground(text_color)
                 self.table_diet_history.setItem(row_position, 1, title_item)
                 
                 # Column 2: Status
                 status_item = QTableWidgetItem(status)
-                if bg_color:
-                    status_item.setBackground(bg_color)
-                    status_item.setForeground(text_color)
                 self.table_diet_history.setItem(row_position, 2, status_item)
                 
                 # --- CRITICAL STEP: Hidden ID ---
