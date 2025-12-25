@@ -335,8 +335,21 @@ class MainController(QMainWindow):
         if not full_name:
             QMessageBox.warning(self, "Warning", "Name cannot be empty!")
             return
+        
         if not phone:
             QMessageBox.warning(self, "Validation Error", "Phone number cannot be empty!")
+            return
+        
+        # Validate phone format
+        is_valid_phone, phone_error = self.validate_phone(phone)
+        if not is_valid_phone:
+            QMessageBox.warning(self, "Validation Error", f"Invalid phone number: {phone_error}")
+            return
+        
+        # Validate birth date
+        is_valid_birth_date, birth_date_error = self.validate_birth_date(birth_date)
+        if not is_valid_birth_date:
+            QMessageBox.warning(self, "Validation Error", birth_date_error)
             return
 
         if self.db is not None:
@@ -756,6 +769,10 @@ class MainController(QMainWindow):
             # Retrieve data from the dialog form
             data = dialog.get_data()
             
+            # Check if validation failed (get_data returns None on validation error)
+            if data is None:
+                return
+            
             # Attempt to save the data to the database
             success = self.add_measurement_entry(self.current_client_id, data)
             
@@ -863,6 +880,12 @@ class MainController(QMainWindow):
             dialog = MeasurementDialog(self, measurement_data)
             
             if dialog.exec_() == QDialog.Accepted:
+                # Validate measurements
+                is_valid, error_msg = dialog.validate_measurements()
+                if not is_valid:
+                    QMessageBox.warning(self, "Validation Error", error_msg)
+                    return
+                
                 # Get updated values from dialog
                 updated_data = {
                     'weight': dialog.input_weight.value(),
@@ -1170,18 +1193,34 @@ class MainController(QMainWindow):
         if not title:
             QMessageBox.warning(None, "Warning", "Please enter a title for the diet plan!")
             return
+        
+        if len(title) < 3:
+            QMessageBox.warning(None, "Validation Error", "Diet plan title must be at least 3 characters!")
+            return
 
         # 4. Validation: Check main meals (Breakfast, Lunch, Dinner)
         if not breakfast:
             QMessageBox.warning(None, "Validation Error", "Breakfast cannot be empty!")
             return
+        
+        if len(breakfast) < 5:
+            QMessageBox.warning(None, "Validation Error", "Breakfast description must be at least 5 characters!")
+            return
 
         if not lunch:
             QMessageBox.warning(None, "Validation Error", "Lunch cannot be empty!")
             return
+        
+        if len(lunch) < 5:
+            QMessageBox.warning(None, "Validation Error", "Lunch description must be at least 5 characters!")
+            return
 
         if not dinner:
             QMessageBox.warning(None, "Validation Error", "Dinner cannot be empty!")
+            return
+        
+        if len(dinner) < 5:
+            QMessageBox.warning(None, "Validation Error", "Dinner description must be at least 5 characters!")
             return
 
 
@@ -1436,7 +1475,110 @@ class MainController(QMainWindow):
         except Exception as e:
             print(f"Error resetting diet sub-stack: {e}")
         
-        self.show_diet_empty_state()  # Show empty state on page entry
+        self.show_diet_empty_state()  # Show empty state on page entry    
+    # ====================================================
+    # VALIDATION METHODS
+    # ====================================================
+    
+    def validate_phone(self, phone):
+        """
+        Validate phone number format and length.
+        Allows various formats: +1 555 0123, (555) 123-4567, 555-123-4567, 5551234567
+        
+        Args:
+            phone (str): Phone number to validate
+            
+        Returns:
+            tuple: (is_valid, error_message)
+        """
+        import re
+        
+        # Remove spaces and common separators for validation
+        cleaned = re.sub(r'[\s\-\(\)\.]+', '', phone)
+        
+        # Check if only digits and + at start
+        if not re.match(r'^\+?\d{7,15}$', cleaned):
+            return False, "Phone number must be 7-15 digits (with optional country code)"
+        
+        return True, ""
+    
+    def validate_birth_date(self, birth_date_str):
+        """
+        Validate birth date:
+        - Not in the future
+        - Age between 8 and 120 years old
+        
+        Args:
+            birth_date_str (str): Birth date in yyyy-MM-dd format
+            
+        Returns:
+            tuple: (is_valid, error_message)
+        """
+        try:
+            birth_date = datetime.strptime(birth_date_str, "%Y-%m-%d")
+            today = datetime.today()
+            
+            # Check if future date
+            if birth_date > today:
+                return False, "Birth date cannot be in the future"
+            
+            # Use existing calculate_age() method to avoid code duplication
+            age = self.calculate_age(birth_date_str)
+            
+            if age is None:
+                return False, "Invalid date format"
+            
+            # Check age range
+            if age < 8:
+                return False, "Client must be at least 8 years old"
+            if age > 120:
+                return False, "Birth date is unrealistic (age > 120)"
+            
+            return True, ""
+        except:
+            return False, "Invalid date format"
+    
+    def validate_email(self, email):
+        """
+        Validate email format
+        
+        Args:
+            email (str): Email address
+            
+        Returns:
+            tuple: (is_valid, error_message)
+        """
+        import re
+        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(pattern, email):
+            return False, "Invalid email format"
+        return True, ""
+    
+    def validate_measurement_values(self, height, weight, body_fat):
+        """
+        Validate measurement values for sensible ranges
+        
+        Args:
+            height (float): Height in cm
+            weight (float): Weight in kg
+            body_fat (float): Body fat percentage (0-100)
+            
+        Returns:
+            tuple: (is_valid, error_message)
+        """
+        # Height validation: 100-250 cm (reasonable human range)
+        if height and (height < 100 or height > 250):
+            return False, "Height must be between 100-250 cm"
+        
+        # Weight validation: 20-500 kg
+        if weight and (weight < 20 or weight > 500):
+            return False, "Weight must be between 20-500 kg"
+        
+        # Body fat: 0-100%
+        if body_fat and (body_fat < 0 or body_fat > 100):
+            return False, "Body fat must be between 0-100%"
+        
+        return True, ""
 
     def init_ui_logic(self):
         """
@@ -1543,16 +1685,32 @@ class MainController(QMainWindow):
             QMessageBox.warning(None, "Validation Error", "Title cannot be empty!")
             return
         
+        if len(title) < 3:
+            QMessageBox.warning(None, "Validation Error", "Diet plan title must be at least 3 characters!")
+            return
+        
         if not breakfast:
             QMessageBox.warning(None, "Validation Error", "Breakfast cannot be empty!")
+            return
+        
+        if len(breakfast) < 5:
+            QMessageBox.warning(None, "Validation Error", "Breakfast description must be at least 5 characters!")
             return
         
         if not lunch:
             QMessageBox.warning(None, "Validation Error", "Lunch cannot be empty!")
             return
         
+        if len(lunch) < 5:
+            QMessageBox.warning(None, "Validation Error", "Lunch description must be at least 5 characters!")
+            return
+        
         if not dinner:
             QMessageBox.warning(None, "Validation Error", "Dinner cannot be empty!")
+            return
+        
+        if len(dinner) < 5:
+            QMessageBox.warning(None, "Validation Error", "Dinner description must be at least 5 characters!")
             return
         
         # 4. Prepare updated data

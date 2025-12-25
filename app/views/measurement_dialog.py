@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QFormLayout, QDialogButtonBox, 
-                             QLabel, QDoubleSpinBox, QDateEdit, QTextEdit)
+                             QLabel, QDoubleSpinBox, QDateEdit, QTextEdit, QMessageBox)
 from PyQt5.QtCore import Qt, QDate
 
 class MeasurementDialog(QDialog):
@@ -145,11 +145,56 @@ class MeasurementDialog(QDialog):
             self.input_thigh.setValue(self.measurement_data.get('thigh', 0))
             self.input_notes.setPlainText(self.measurement_data.get('notes', ''))
 
+    def validate_measurements(self):
+        """
+        Validate measurement values for sensible ranges.
+        
+        Returns:
+            tuple: (is_valid, error_message)
+        """
+        height = self.input_height.value()
+        weight = self.input_weight.value()
+        body_fat = self.input_fat.value()
+        
+        # Height validation: 100-250 cm (reasonable human range)
+        if height and (height < 100 or height > 250):
+            return False, "Height must be between 100-250 cm"
+        
+        # Weight validation: 20-500 kg
+        if weight and (weight < 20 or weight > 500):
+            return False, "Weight must be between 20-500 kg"
+        
+        # Body fat: 0-100%
+        if body_fat and (body_fat < 0 or body_fat > 100):
+            return False, "Body fat must be between 0-100%"
+        
+        # Waist, Hip, Chest, Arm, Thigh circumferences (5-150 cm)
+        circumferences = {
+            "Waist": self.input_waist.value(),
+            "Hip": self.input_hip.value(),
+            "Chest": self.input_chest.value(),
+            "Arm": self.input_arm.value(),
+            "Thigh": self.input_thigh.value()
+        }
+        
+        for name, value in circumferences.items():
+            if value and (value < 5 or value > 150):
+                return False, f"{name} circumference must be between 5-150 cm"
+        
+        return True, ""
+
     def get_data(self):
         """
         Collects ALL data from input fields and returns a dictionary.
         This dictionary matches the MongoDB document structure.
+        Includes validation of measurement values.
         """
+        # Validate before returning
+        is_valid, error_msg = self.validate_measurements()
+        if not is_valid:
+            QMessageBox.warning(self, "Validation Error", error_msg)
+            return None
+        
         return {
             "date": self.input_date.date().toPyDate().strftime("%Y-%m-%d"),
             

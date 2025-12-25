@@ -70,6 +70,8 @@ class EditProfileDialog(QDialog):
     
     def save_changes(self):
         """Save updated profile to database"""
+        import re
+        
         fullname = self.input_fullname.text().strip()
         email = self.input_email.text().strip()
         
@@ -80,6 +82,12 @@ class EditProfileDialog(QDialog):
         
         if not email:
             QMessageBox.warning(self, "Validation Error", "Email cannot be empty")
+            return
+        
+        # Validate email format
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, email):
+            QMessageBox.warning(self, "Validation Error", "Invalid email format")
             return
         
         try:
