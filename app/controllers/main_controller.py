@@ -828,8 +828,6 @@ class MainController(QMainWindow):
                 # Remove old Chart and recreate
                 if self.trend_chart is not None:
                     tab_overview.layout().removeWidget(self.trend_chart)
-                    if self.trend_chart in self.trend_charts:
-                        self.trend_charts.remove(self.trend_chart)
                     self.trend_chart.deleteLater()
                     self.trend_chart = None
                     tab_overview.layout().update()  # Force layout update

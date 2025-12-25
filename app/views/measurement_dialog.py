@@ -43,7 +43,7 @@ class MeasurementDialog(QDialog):
         
         # Weight (kg)
         self.input_weight = QDoubleSpinBox()
-        self.input_weight.setRange(0, 300)
+        self.input_weight.setRange(0, 500)
         form_layout.addRow("Weight (kg):", self.input_weight)
 
         # Height (cm)
@@ -157,15 +157,15 @@ class MeasurementDialog(QDialog):
         body_fat = self.input_fat.value()
         
         # Height validation: 100-250 cm (reasonable human range)
-        if height and (height < 100 or height > 250):
+        if height < 100 or height > 250:
             return False, "Height must be between 100-250 cm"
         
         # Weight validation: 20-500 kg
-        if weight and (weight < 20 or weight > 500):
+        if weight < 20 or weight > 500:
             return False, "Weight must be between 20-500 kg"
         
         # Body fat: 0-100%
-        if body_fat and (body_fat < 0 or body_fat > 100):
+        if body_fat < 0 or body_fat > 100:
             return False, "Body fat must be between 0-100%"
         
         # Waist, Hip, Chest, Arm, Thigh circumferences (5-150 cm)
@@ -178,7 +178,7 @@ class MeasurementDialog(QDialog):
         }
         
         for name, value in circumferences.items():
-            if value and (value < 5 or value > 150):
+            if value < 5 or value > 150:
                 return False, f"{name} circumference must be between 5-150 cm"
         
         return True, ""
