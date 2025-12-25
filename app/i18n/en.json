@@ -1,6 +1,6 @@
 {
   "login": {
-    "title": "Dietician Client Tracker",
+    "title": "Dietitian Client Tracker",
     "username": "Username",
     "password": "Password",
     "login_button": "Login",
@@ -41,7 +41,7 @@
     "settings": "Settings"
   },
   "clients": {
-    "title": "Clients Management",
+    "title": "Clients",
     "add_client": "Add New Client",
     "edit_client": "Edit Client",
     "delete_client": "Delete Client",
@@ -116,7 +116,7 @@
     "date": "Date",
     "status": "Status",
     "active": "Active",
-    "passive": "Passive",
+    "passive": "Archived",
     "content": "Content",
     "diet_added": "Diet Plan saved successfully!",
     "diet_updated": "Diet Plan updated successfully!",
