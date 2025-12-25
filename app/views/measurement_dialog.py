@@ -43,7 +43,7 @@ class MeasurementDialog(QDialog):
         
         # Weight (kg)
         self.input_weight = QDoubleSpinBox()
-        self.input_weight.setRange(0, 500)
+        self.input_weight.setRange(0, 600)
         form_layout.addRow("Weight (kg):", self.input_weight)
 
         # Height (cm)
@@ -55,7 +55,7 @@ class MeasurementDialog(QDialog):
         
         # Body Fat Ratio (%)
         self.input_fat = QDoubleSpinBox()
-        self.input_fat.setRange(0, 100)
+        self.input_fat.setRange(0, 150)
         form_layout.addRow("Body Fat Ratio (%):", self.input_fat)
 
         # Muscle Mass (kg)
