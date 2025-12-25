@@ -154,6 +154,7 @@ class SignupController(QMainWindow):
                 "email": email,
                 "username": username,
                 "password": hashed_password,
+                "preferred_language": "en",  # Default language is English
                 "created_at": datetime.now()
             }
             

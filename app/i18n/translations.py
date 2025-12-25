@@ -114,16 +114,24 @@ class TranslationService:
             logger.error(f"Failed to load translations: {str(e)}")
     
     @classmethod
-    def get(cls, key: str, default: str = "") -> str:
+    def get(cls, key: str, default: str = "", **kwargs) -> str:
         """
         Get translated string by key with proper fallback and logging.
+        Supports dynamic placeholder replacement (e.g., {min}, {max}).
         
         Args:
             key: Translation key (e.g., "validation.phone_empty")
             default: Default value if key not found
+            **kwargs: Format arguments for placeholders (e.g., min=3, max=50)
+                     Will replace {min} with 3, {max} with 50 in the string
             
         Returns:
             str: Translated string or default value
+            
+        Examples:
+            T("validation.age_min", min=18)
+            T("validation.password_min", min=6)
+            T("validation.phone_invalid", min=7, max=15)
         """
         if not cls._is_loaded:
             logger.warning("TranslationService not initialized. Call initialize() first.")
@@ -149,7 +157,18 @@ class TranslationService:
                     logger.warning(f"Invalid path for key '{key}'")
                 return default
         
-        return value if value else default
+        result = value if value else default
+        
+        # Format the string with provided kwargs if any
+        if kwargs and isinstance(result, str):
+            try:
+                result = result.format(**kwargs)
+            except KeyError as e:
+                logger.warning(
+                    f"Missing placeholder in translation '{key}': {str(e)}"
+                )
+        
+        return result
     
     @classmethod
     def set_language(cls, language: str):
@@ -243,6 +262,13 @@ class TranslationService:
 
 
 # Global function for easier usage
-def T(key: str, default: str = "") -> str:
-    """Shorthand for TranslationService.get()"""
-    return TranslationService.get(key, default)
+def T(key: str, default: str = "", **kwargs) -> str:
+    """
+    Shorthand for TranslationService.get()
+    
+    Usage:
+        T("login.title")
+        T("validation.age_min", min=18)
+        T("validation.password_min", min=6)
+    """
+    return TranslationService.get(key, default, **kwargs)

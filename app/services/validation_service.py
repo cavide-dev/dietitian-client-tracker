@@ -8,6 +8,16 @@ import re
 from datetime import datetime, date
 from typing import Tuple
 
+# Import TranslationService for multi-language support
+try:
+    from app.i18n.translations import T, TranslationService
+    HAS_TRANSLATION = True
+except ImportError:
+    HAS_TRANSLATION = False
+    # Fallback Turkish messages if TranslationService not available
+    def T(key, default="", **kwargs):
+        return default or key
+
 
 class ValidationService:
     """Handles all application-wide validation."""
@@ -38,10 +48,10 @@ class ValidationService:
         phone = phone.strip()
         
         if not phone:
-            return False, "Phone number cannot be empty"
+            return False, T("validation.phone_empty", "Phone number cannot be empty")
         
         if not ValidationService.PHONE_PATTERN.match(phone):
-            return False, "Phone number must be 7-15 digits"
+            return False, T("validation.phone_invalid", "Phone number must be 7-15 digits", min=7, max=15)
         
         return True, ""
 
@@ -59,10 +69,10 @@ class ValidationService:
         email = email.strip()
         
         if not email:
-            return False, "E-posta boş olamaz"
+            return False, T("validation.email_empty", "Email cannot be empty")
         
         if not ValidationService.EMAIL_PATTERN.match(email):
-            return False, "Geçerli bir e-posta adresi giriniz"
+            return False, T("validation.email_invalid", "Please enter a valid email address")
         
         return True, ""
 
@@ -88,7 +98,7 @@ class ValidationService:
             
             # Check if future
             if birth_date_obj > date.today():
-                return False, "Doğum tarihi günümüzden sonra olamaz"
+                return False, T("validation.birth_date_future", "Birth date cannot be in the future")
             
             # Calculate age
             today = date.today()
@@ -100,15 +110,15 @@ class ValidationService:
             
             # Check age range
             if age < ValidationService.MIN_AGE:
-                return False, f"Yaş en az {ValidationService.MIN_AGE} olmalıdır"
+                return False, T("validation.age_min", f"Age must be at least {ValidationService.MIN_AGE}", min=ValidationService.MIN_AGE)
             
             if age > ValidationService.MAX_AGE:
-                return False, f"Yaş {ValidationService.MAX_AGE} yaşından fazla olamaz"
+                return False, T("validation.age_max", f"Age cannot exceed {ValidationService.MAX_AGE}", max=ValidationService.MAX_AGE)
             
             return True, ""
         
         except (ValueError, AttributeError) as e:
-            return False, f"Geçerli bir tarih formatı giriniz (YYYY-MM-DD): {str(e)}"
+            return False, T("validation.date_format", f"Please enter a valid date format (YYYY-MM-DD): {str(e)}")
 
     @staticmethod
     def validate_measurement_values(
@@ -130,7 +140,10 @@ class ValidationService:
             if height < ValidationService.HEIGHT_MIN or height > ValidationService.HEIGHT_MAX:
                 return (
                     False,
-                    f"Height must be between {ValidationService.HEIGHT_MIN}-{ValidationService.HEIGHT_MAX} cm arasında olmalıdır",
+                    T("validation.height_range", 
+                      f"Height must be between {ValidationService.HEIGHT_MIN}-{ValidationService.HEIGHT_MAX} cm",
+                      min=ValidationService.HEIGHT_MIN,
+                      max=ValidationService.HEIGHT_MAX),
                 )
         
         # Weight validation (allow 0)
@@ -138,7 +151,10 @@ class ValidationService:
             if weight < ValidationService.WEIGHT_MIN or weight > ValidationService.WEIGHT_MAX:
                 return (
                     False,
-                    f"Weight must be between {ValidationService.WEIGHT_MIN}-{ValidationService.WEIGHT_MAX} kg arasında olmalıdır",
+                    T("validation.weight_range",
+                      f"Weight must be between {ValidationService.WEIGHT_MIN}-{ValidationService.WEIGHT_MAX} kg",
+                      min=ValidationService.WEIGHT_MIN,
+                      max=ValidationService.WEIGHT_MAX),
                 )
         
         # Body fat validation
@@ -146,7 +162,10 @@ class ValidationService:
             if body_fat < ValidationService.BODY_FAT_MIN or body_fat > ValidationService.BODY_FAT_MAX:
                 return (
                     False,
-                    f"Vücut yağ oranı {ValidationService.BODY_FAT_MIN}-{ValidationService.BODY_FAT_MAX}% arasında olmalıdır",
+                    T("validation.body_fat_range",
+                      f"Body fat percentage must be between {ValidationService.BODY_FAT_MIN}-{ValidationService.BODY_FAT_MAX}%",
+                      min=ValidationService.BODY_FAT_MIN,
+                      max=ValidationService.BODY_FAT_MAX),
                 )
         
         return True, ""
@@ -168,10 +187,10 @@ class ValidationService:
         title = title.strip()
         
         if not title:
-            return False, "Diyet planı başlığı boş olamaz"
+            return False, T("validation.diet_title_empty", "Diet plan title cannot be empty")
         
         if len(title) < min_characters:
-            return False, f"Başlık en az {min_characters} karakter olmalıdır"
+            return False, T("validation.diet_title_min", f"Title must be at least {min_characters} characters", min=min_characters)
         
         return True, ""
 
@@ -190,10 +209,10 @@ class ValidationService:
         name = name.strip()
         
         if not name:
-            return False, "İsim boş olamaz"
+            return False, T("validation.name_empty", "Name cannot be empty")
         
         if len(name) < min_characters:
-            return False, f"İsim en az {min_characters} karakter olmalıdır"
+            return False, T("validation.name_min", f"Name must be at least {min_characters} characters", min=min_characters)
         
         return True, ""
 
@@ -237,10 +256,10 @@ class ValidationService:
             Tuple: (is_valid, error_message)
         """
         if not password:
-            return False, "Şifre boş olamaz"
+            return False, T("validation.password_empty", "Password cannot be empty")
         
         if len(password) < min_length:
-            return False, f"Şifre en az {min_length} karakter olmalıdır"
+            return False, T("validation.password_min", f"Password must be at least {min_length} characters", min=min_length)
         
         return True, ""
 
@@ -259,10 +278,10 @@ class ValidationService:
         username = username.strip()
         
         if not username:
-            return False, "Kullanıcı adı boş olamaz"
+            return False, T("validation.username_empty", "Username cannot be empty")
         
         if len(username) < min_length:
-            return False, f"Kullanıcı adı en az {min_length} karakter olmalıdır"
+            return False, T("validation.username_min", f"Username must be at least {min_length} characters", min=min_length)
         
         return True, ""
 
@@ -281,10 +300,10 @@ class ValidationService:
         fullname = fullname.strip()
         
         if not fullname:
-            return False, "Ad Soyad boş olamaz"
+            return False, T("validation.fullname_empty", "Full name cannot be empty")
         
         if len(fullname) < min_length:
-            return False, f"Full name must be at least {min_length} karakter olmalıdır"
+            return False, T("validation.fullname_min", f"Full name must be at least {min_length} characters", min=min_length)
         
         return True, ""
 
@@ -303,10 +322,10 @@ class ValidationService:
         meal_text = meal_text.strip()
         
         if not meal_text:
-            return False, "Öğün boş olamaz"
+            return False, T("validation.meal_empty", "Meal cannot be empty")
         
         if len(meal_text) < min_length:
-            return False, f"Öğün açıklaması en az {min_length} karakter olmalıdır"
+            return False, T("validation.meal_min", f"Meal description must be at least {min_length} characters", min=min_length)
         
         return True, ""
 

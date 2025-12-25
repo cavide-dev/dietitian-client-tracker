@@ -50,6 +50,7 @@ def seed_dieticians():
             "password": hashed_password,
             "email": "admin@dietician.com",
             "fullname": "Administrator",
+            "preferred_language": "en",  # Default language
             "created_at": None  # Will be set by MongoDB
         }
         
@@ -69,6 +70,7 @@ def seed_dieticians():
             "password": hashed_password,
             "email": "test@dietician.com",
             "fullname": "Test Dietician",
+            "preferred_language": "en",  # Default language
             "created_at": None
         }
         

@@ -17,6 +17,7 @@ load_dotenv()
 
 # Import SignupController for signup functionality
 from app.controllers.signup_controller import SignupController
+from app.i18n.translations import TranslationService
 
 class LoginController(QMainWindow):
     # Signal: Emitted when login is successful
@@ -119,6 +120,10 @@ class LoginController(QMainWindow):
             
             # Login successful! 
             self.current_user = user
+            
+            # Initialize TranslationService with user's preferred language
+            user_language = user.get("preferred_language", "en")
+            TranslationService.initialize(language=user_language, debug=False)
             
             # Emit signal to notify run.py that login was successful
             # Send user data so main_window knows who's logged in

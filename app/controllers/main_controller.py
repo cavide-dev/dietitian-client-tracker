@@ -15,6 +15,7 @@ from app.services.calculation_service import CalculationService
 from app.controllers.client_controller import ClientController
 from app.controllers.diet_controller import DietController
 from app.controllers.measurement_controller import MeasurementController
+from app.i18n.translations import TranslationService
 import os
 import sys
 import pymongo
@@ -155,6 +156,11 @@ class MainController(QMainWindow):
         # Load theme preference FIRST, then connect signal
         self.load_theme_preference()
         self.combo_theme.currentIndexChanged.connect(self.on_theme_changed)
+        
+        # --- LANGUAGE SWITCHER ---
+        # Load language preference FIRST, then connect signal
+        self.load_language_preference()
+        self.combo_language.currentIndexChanged.connect(self.on_language_changed)
         
         # --- Default View Settings ---
         self.stack_diet_sub.setCurrentIndex(0)
@@ -555,6 +561,55 @@ class MainController(QMainWindow):
             print(f"  Looked for file at: {styles_dir}")
         except Exception as e:
             print(f"✗ Error applying theme: {e}")
+
+    def load_language_preference(self):
+        """Load user's saved language preference from database, default to English"""
+        try:
+            if self.current_user is None:
+                # Set to first item (English)
+                self.combo_language.setCurrentIndex(0)
+                return
+
+            # Get user's language preference from current_user dict
+            language = self.current_user.get("preferred_language", "en")
+            
+            # Map language code to combo box index
+            language_map = {"en": 0, "tr": 1, "ko": 2}
+            index = language_map.get(language, 0)
+            
+            # Set combo_language to match (without triggering signal initially)
+            self.combo_language.blockSignals(True)
+            self.combo_language.setCurrentIndex(index)
+            self.combo_language.blockSignals(False)
+            
+            print(f"✓ Language preference loaded: {language}")
+                
+        except Exception as e:
+            print(f"Error loading language preference: {e}")
+            self.combo_language.setCurrentIndex(0)
+
+    def on_language_changed(self, index):
+        """Handle language change from combo_language dropdown"""
+        # Map combo box index to language code
+        language_map = {0: "en", 1: "tr", 2: "ko"}
+        language_code = language_map.get(index, "en")
+        
+        # Update TranslationService
+        TranslationService.initialize(language=language_code, debug=False)
+        
+        # Save preference to database
+        try:
+            if self.db is not None and self.current_user is not None:
+                username = self.current_user.get("username")
+                self.db['dieticians'].update_one(
+                    {"username": username},
+                    {"$set": {"preferred_language": language_code}}
+                )
+                # Update current_user dict for consistency
+                self.current_user["preferred_language"] = language_code
+                print(f"✓ Language changed to: {language_code}")
+        except Exception as e:
+            print(f"Error saving language preference: {e}")
 
     def handle_diet_save(self):
         """
