@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QHeaderView, QMessageBox, QAbstractItemView, QDialog, QMenu, QLabel
+from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QHeaderView, QMessageBox, QAbstractItemView, QDialog, QMenu, QLabel, QFileDialog
 from PyQt5.QtGui import QColor
 from PyQt5.uic import loadUi
 from PyQt5.QtCore import Qt, QDate, QTimer, pyqtSignal
@@ -12,6 +12,7 @@ from app.views.edit_profile_dialog import EditProfileDialog
 from app.views.change_password_dialog import ChangePasswordDialog
 from app.services.validation_service import ValidationService
 from app.services.calculation_service import CalculationService
+from app.services.export_service import ExportService
 from app.controllers.client_controller import ClientController
 from app.controllers.diet_controller import DietController
 from app.controllers.measurement_controller import MeasurementController
@@ -163,6 +164,12 @@ class MainController(QMainWindow):
         # Refresh UI labels immediately after loading language preference
         self.refresh_ui_labels()
         self.combo_language.currentIndexChanged.connect(self.on_language_changed)
+        
+        # --- EXPORT & BACKUP BUTTONS ---
+        if hasattr(self, 'btn_export_pdf'):
+            self.btn_export_pdf.clicked.connect(self.handle_export_pdf)
+        if hasattr(self, 'btn_backup'):
+            self.btn_backup.clicked.connect(self.handle_backup)
         
         # --- Default View Settings ---
         self.stack_diet_sub.setCurrentIndex(0)
@@ -854,3 +861,98 @@ class MainController(QMainWindow):
         else:
             # New diet mode - create new diet
             self.diet_controller.save_diet_plan()
+
+    def handle_export_pdf(self):
+        """
+        Handle PDF export button click.
+        Opens file dialog and exports clients list to PDF.
+        """
+        try:
+            # Get clients from database
+            user_filter = {}
+            if self.current_user:
+                user_filter = {"dietician_username": self.current_user.get("username")}
+            
+            clients = list(self.db['clients'].find(user_filter).sort("fullname", 1))
+            
+            if not clients:
+                QMessageBox.warning(
+                    self,
+                    TranslationService.get("dialogs.warning", "Warning"),
+                    TranslationService.get("clients.no_clients", "No clients found to export!")
+                )
+                return
+            
+            # Open file dialog to choose save location
+            file_path, _ = QFileDialog.getSaveFileName(
+                self,
+                TranslationService.get("dialogs.export_pdf", "Export Clients to PDF"),
+                f"clients_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
+                "PDF Files (*.pdf)"
+            )
+            
+            if not file_path:
+                return
+            
+            # Export to PDF
+            success, message = ExportService.export_clients_to_pdf(clients, file_path)
+            
+            if success:
+                QMessageBox.information(
+                    self,
+                    TranslationService.get("dialogs.success", "Success"),
+                    message
+                )
+            else:
+                QMessageBox.critical(
+                    self,
+                    TranslationService.get("dialogs.error", "Error"),
+                    message
+                )
+                
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                TranslationService.get("dialogs.error", "Error"),
+                TranslationService.get("messages.export_error", "Error exporting PDF: ") + str(e)
+            )
+    
+    def handle_backup(self):
+        """
+        Handle backup button click.
+        Opens file dialog and creates JSON backup of all data.
+        """
+        try:
+            # Open file dialog to choose save location
+            file_path, _ = QFileDialog.getSaveFileName(
+                self,
+                TranslationService.get("dialogs.backup", "Create Backup"),
+                f"backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                "JSON Files (*.json)"
+            )
+            
+            if not file_path:
+                return
+            
+            # Create backup
+            success, message = ExportService.backup_to_json(self.db, file_path)
+            
+            if success:
+                QMessageBox.information(
+                    self,
+                    TranslationService.get("dialogs.success", "Success"),
+                    message
+                )
+            else:
+                QMessageBox.critical(
+                    self,
+                    TranslationService.get("dialogs.error", "Error"),
+                    message
+                )
+                
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                TranslationService.get("dialogs.error", "Error"),
+                TranslationService.get("messages.backup_error", "Error creating backup: ") + str(e)
+            )

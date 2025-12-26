@@ -200,7 +200,10 @@
     "please_select": "먼저 항목을 선택해 주세요!",
     "please_fill_all": "필수 항목을 모두 입력해 주세요",
     "invalid_input": "입력값이 올바르지 않습니다",
-    "try_again": "다시 시도해 주세요"
+    "try_again": "다시 시도해 주세요",
+    "export_pdf": "고객을 PDF로 내보내기",
+    "backup": "백업 생성",
+    "restore": "백업에서 복구"
   },
   "profile_dialogs": {
     "edit_profile_title": "프로필 수정",
@@ -305,6 +308,14 @@
     "no_clients_found": "고객이 없습니다",
     "no_measurements_found": "측정 기록이 없습니다",
     "no_diets_found": "플랜이 없습니다",
-    "select_client_first": "먼저 고객을 선택해 주세요"
+    "select_client_first": "먼저 고객을 선택해 주세요",
+    "export_success": "PDF로 성공적으로 내보내졌습니다!",
+    "export_error": "PDF 내보내기 오류: ",
+    "backup_success": "백업이 성공적으로 생성되었습니다!",
+    "backup_error": "백업 생성 오류: ",
+    "restore_success": "백업이 성공적으로 복구되었습니다! ({count} 기록)",
+    "restore_error": "백업 복구 오류: ",
+    "file_not_found": "백업 파일을 찾을 수 없습니다!",
+    "invalid_backup_file": "잘못된 백업 파일 형식입니다!"
   }
 }

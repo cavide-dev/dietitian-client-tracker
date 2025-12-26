@@ -200,7 +200,10 @@
     "please_select": "Please select an item first!",
     "please_fill_all": "Please fill all required fields",
     "invalid_input": "Invalid input",
-    "try_again": "Please try again"
+    "try_again": "Please try again",
+    "export_pdf": "Export Clients to PDF",
+    "backup": "Create Backup",
+    "restore": "Restore from Backup"
   },
   "profile_dialogs": {
     "edit_profile_title": "Edit Profile",
@@ -305,6 +308,14 @@
     "no_clients_found": "No clients found",
     "no_measurements_found": "No measurements available",
     "no_diets_found": "No diet plans available",
-    "select_client_first": "Please select a client first"
+    "select_client_first": "Please select a client first",
+    "export_success": "PDF exported successfully!",
+    "export_error": "Error exporting PDF: ",
+    "backup_success": "Backup created successfully!",
+    "backup_error": "Error creating backup: ",
+    "restore_success": "Backup restored successfully! ({count} records)",
+    "restore_error": "Error restoring backup: ",
+    "file_not_found": "Backup file not found!",
+    "invalid_backup_file": "Invalid backup file format!"
   }
 }

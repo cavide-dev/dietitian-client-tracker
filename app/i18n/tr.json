@@ -200,7 +200,10 @@
     "please_select": "Lütfen önce bir öğe seçin!",
     "please_fill_all": "Lütfen tüm zorunlu alanları doldurun",
     "invalid_input": "Geçersiz giriş",
-    "try_again": "Lütfen tekrar deneyin"
+    "try_again": "Lütfen tekrar deneyin",
+    "export_pdf": "Danışanları PDF'e Aktar",
+    "backup": "Yedek Oluştur",
+    "restore": "Yedekten Geri Yükle"
   },
   "profile_dialogs": {
     "edit_profile_title": "Profili Düzenle",
@@ -305,6 +308,14 @@
     "no_clients_found": "Danışan bulunamadı",
     "no_measurements_found": "Ölçüm bulunamadı",
     "no_diets_found": "Diyet planı bulunamadı",
-    "select_client_first": "Lütfen önce bir danışan seçin"
+    "select_client_first": "Lütfen önce bir danışan seçin",
+    "export_success": "PDF başarıyla dışa aktarıldı!",
+    "export_error": "PDF dışa aktarırken hata: ",
+    "backup_success": "Yedekleme başarıyla oluşturuldu!",
+    "backup_error": "Yedekleme oluşturulurken hata: ",
+    "restore_success": "Yedekleme başarıyla geri yüklendi! ({count} kayıt)",
+    "restore_error": "Yedekleme geri yüklenirken hata: ",
+    "file_not_found": "Yedekleme dosyası bulunamadı!",
+    "invalid_backup_file": "Geçersiz yedekleme dosyası biçimi!"
   }
 }

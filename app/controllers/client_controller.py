@@ -201,11 +201,14 @@ class ClientController:
                 if birth_date:
                     age = CalculationService.calculate_age(birth_date)
                     if age is not None:
-                        self.main.lbl_age.setText(f"Age: {age}")
+                        age_label = TranslationService.get("clients.age", "Age")
+                        self.main.lbl_age.setText(f"{age_label}: {age}")
                     else:
-                        self.main.lbl_age.setText("Age: -")
+                        age_label = TranslationService.get("clients.age", "Age")
+                        self.main.lbl_age.setText(f"{age_label}: -")
                 else:
-                    self.main.lbl_age.setText("Age: -")
+                    age_label = TranslationService.get("clients.age", "Age")
+                    self.main.lbl_age.setText(f"{age_label}: -")
                 
                 self.main.stackedWidget.setCurrentWidget(self.main.page_client_detail)
                 
