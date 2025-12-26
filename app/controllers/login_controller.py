@@ -171,10 +171,17 @@ class LoginController(QMainWindow):
         Called when signup is completed
         Show login window again
         """
-        # Clear login form
+        # Show login window
+        self.show()
+        
+        # Close signup window if still open
+        if self.signup_window:
+            self.signup_window.close()
+        
+        # Clear login form and error message
         self.input_username.setText("")
         self.input_password.setText("")
-        self.label_error.setText("Account created! Please sign in.")
+        self.label_error.setText("")
     
     def setup_language_buttons(self):
         """Add language selection text labels to login window (top right)"""

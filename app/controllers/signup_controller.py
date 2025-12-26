@@ -180,6 +180,7 @@ class SignupController(QMainWindow):
         Go back to login window
         """
         self.signup_successful.emit()
+        # Close this signup window
         self.close()
     
     def setup_language_buttons(self):
