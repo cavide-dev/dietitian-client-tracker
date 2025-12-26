@@ -139,7 +139,9 @@
     "diet_deleted": "Diet plan deleted successfully!",
     "delete_confirm": "Are you sure you want to delete this diet plan?",
     "no_diets": "No diet plans available. Create one!",
-    "select_client_first": "Please select a client first!"
+    "select_client": "Please select a client first!",
+    "select_diet_update": "Please select a diet plan to update!",
+    "select_diet_delete": "Please select a diet plan to delete!"
   },
   "settings": {
     "title": "Settings",

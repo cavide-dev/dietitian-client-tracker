@@ -30,7 +30,11 @@ class DietController:
         Save new diet plan. Auto-archives old active plans for the client.
         """
         if not self.main.current_client_id:
-            QMessageBox.warning(self.main, "Warning", "Please select a client first!")
+            QMessageBox.warning(
+                self.main, 
+                TranslationService.get("common.warning", "Warning"),
+                TranslationService.get("diet_plans.select_client", "Please select a client first!")
+            )
             return
 
         # Collect data
@@ -105,21 +109,31 @@ class DietController:
         Update an existing diet plan.
         """
         if not self.main.current_diet_id:
-            QMessageBox.warning(self.main, "Warning", "Please select a diet plan to update!")
+            QMessageBox.warning(
+                self.main, 
+                TranslationService.get("common.warning", "Warning"),
+                TranslationService.get("diet_plans.select_diet_update", "Please select a diet plan to update!")
+            )
             return
 
-        title = self.main.txt_diet_title_edit.text().strip()
-        breakfast = self.main.txt_breakfast_edit.toPlainText().strip()
-        lunch = self.main.txt_lunch_edit.toPlainText().strip()
-        dinner = self.main.txt_dinner_edit.toPlainText().strip()
+        title = self.main.txt_diet_title.text().strip()
+        breakfast = self.main.txt_breakfast.toPlainText().strip()
+        snack_1 = self.main.txt_snack_1.toPlainText().strip()
+        lunch = self.main.txt_lunch.toPlainText().strip()
+        snack_2 = self.main.txt_snack_2.toPlainText().strip()
+        dinner = self.main.txt_dinner.toPlainText().strip()
+        snack_3 = self.main.txt_snack_3.toPlainText().strip()
 
         try:
             diet_data = {
                 "title": title,
                 "content": {
                     "breakfast": breakfast,
+                    "morning_snack": snack_1,
                     "lunch": lunch,
-                    "dinner": dinner
+                    "afternoon_snack": snack_2,
+                    "dinner": dinner,
+                    "evening_snack": snack_3
                 }
             }
 
@@ -139,7 +153,11 @@ class DietController:
         Delete a diet plan.
         """
         if not self.main.current_diet_id:
-            QMessageBox.warning(self.main, "Warning", "Please select a diet plan to delete!")
+            QMessageBox.warning(
+                self.main, 
+                TranslationService.get("common.warning", "Warning"),
+                TranslationService.get("diet_plans.select_diet_delete", "Please select a diet plan to delete!")
+            )
             return
 
         reply = QMessageBox.question(self.main, 'Confirm Delete', 'Delete this diet plan?',

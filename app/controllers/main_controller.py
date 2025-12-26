@@ -648,6 +648,13 @@ class MainController(QMainWindow):
         # Refresh UI labels with new language
         self.refresh_ui_labels()
         
+        # Refresh diet plans page (table and dropdown)
+        if hasattr(self, 'diet_controller') and self.diet_controller:
+            if hasattr(self.diet_controller, 'load_client_diet_plans'):
+                self.diet_controller.load_client_diet_plans()
+            if hasattr(self.diet_controller, 'load_client_dropdown'):
+                self.diet_controller.load_client_dropdown()
+        
         # Refresh stat cards if currently viewing measurements
         if hasattr(self, 'measurement_controller') and self.measurement_controller:
             self.measurement_controller.refresh_stats_and_chart()

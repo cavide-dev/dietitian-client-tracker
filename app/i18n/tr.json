@@ -139,7 +139,9 @@
     "diet_deleted": "Diyet planı başarıyla silindi!",
     "delete_confirm": "Bu diyet planını silmek istediğinizden emin misiniz?",
     "no_diets": "Henüz diyet planı bulunmuyor. Yeni bir tane oluşturun.",
-    "select_client_first": "Lütfen önce bir danışan seçin!"
+    "select_client": "Lütfen önce bir danışan seçin!",
+    "select_diet_update": "Lütfen güncellenecek bir diyet planı seçin!",
+    "select_diet_delete": "Lütfen silinecek bir diyet planı seçin!"
   },
   "settings": {
     "title": "Ayarlar",
