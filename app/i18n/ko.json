@@ -257,7 +257,9 @@
     "diet_title_empty": "플랜 제목을 입력해 주세요",
     "diet_title_min": "제목은 최소 {min}자 이상이어야 합니다",
     "select_client": "먼저 고객을 선택해 주세요!",
-    "required_field": "필수 입력 항목입니다"
+    "required_field": "필수 입력 항목입니다",
+    "current_password_required": "현재 비밀번호를 입력해 주세요",
+    "passwords_mismatch": "비밀번호가 일치하지 않습니다"
   },
   "placeholders": {
     "search": "검색...",

@@ -1212,3 +1212,28 @@ QLabel[status_type="passive"] {
     min-height: 20px;
     border-radius: 10px;
 }
+/* ====================================================
+ * BACK BUTTONS - Gray Style
+ * ====================================================
+ */
+
+QPushButton#btn_back_to_list,
+QPushButton#btn_back_to_diet_list {
+    background-color: #8E8E93;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+QPushButton#btn_back_to_list:hover,
+QPushButton#btn_back_to_diet_list:hover {
+    background-color: #78787C;
+}
+
+QPushButton#btn_back_to_list:pressed,
+QPushButton#btn_back_to_diet_list:pressed {
+    background-color: #636366;
+}

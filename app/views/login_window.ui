@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dietician Client Tracker - Login</string>
+   <string>Dietitian Client Tracker - Login</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -182,14 +182,20 @@
        <layout class="QHBoxLayout" name="horizontalLayout_signup">
         <item>
          <spacer name="horizontalSpacer_left">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
             <horstretch>1</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
           </property>
          </spacer>
         </item>
@@ -205,14 +211,20 @@
         </item>
         <item>
          <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
             <horstretch>1</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
           </property>
          </spacer>
         </item>

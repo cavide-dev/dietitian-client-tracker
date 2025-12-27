@@ -257,7 +257,9 @@
     "diet_title_empty": "Diyet planı başlığı boş bırakılamaz",
     "diet_title_min": "Başlık en az {min} karakter olmalıdır",
     "select_client": "Lütfen önce bir danışan seçin!",
-    "required_field": "Bu alan zorunludur"
+    "required_field": "Bu alan zorunludur",
+    "current_password_required": "Mevcut şifre gereklidir",
+    "passwords_mismatch": "Şifreler eşleşmiyor"
   },
   "placeholders": {
     "search": "Ara...",

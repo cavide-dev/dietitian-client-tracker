@@ -257,7 +257,9 @@
     "diet_title_empty": "Diet plan title cannot be empty",
     "diet_title_min": "Title must be at least {min} characters.",
     "select_client": "Please select a client first!",
-    "required_field": "This field is required"
+    "required_field": "This field is required",
+    "current_password_required": "Current password is required",
+    "passwords_mismatch": "Passwords do not match"
   },
   "placeholders": {
     "search": "Search...",

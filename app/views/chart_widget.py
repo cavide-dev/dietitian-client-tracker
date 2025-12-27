@@ -7,17 +7,17 @@ from datetime import datetime
 from app.i18n.translations import TranslationService
 
 # Set font for Unicode support (Korean, Turkish, etc.)
-# Windows fonts that support CJK characters
-cjk_fonts = ['Malgun Gothic', 'SimSun', 'NotoSansCJK', 'DejaVu Sans']
-for font in cjk_fonts:
-    try:
-        matplotlib.rcParams['font.sans-serif'] = [font] + [f for f in matplotlib.rcParams['font.sans-serif'] if f != font]
-        matplotlib.rcParams['font.weight'] = 'bold'  # Make all text bolder
-        matplotlib.rcParams['axes.labelweight'] = 'bold'
-        matplotlib.rcParams['axes.titleweight'] = 'bold'
-        break
-    except:
-        pass
+# Arial and DejaVu support Turkish + Latin, then fallback to CJK fonts
+matplotlib.rcParams['font.sans-serif'] = [
+    'Arial',           # Supports Turkish + Latin + many Unicode
+    'Verdana',         # Alternative with good Turkish support
+    'DejaVu Sans',     # Unicode support
+    'SimSun',          # CJK support
+    'NotoSansCJK'      # CJK support
+]
+matplotlib.rcParams['font.weight'] = 'bold'
+matplotlib.rcParams['axes.labelweight'] = 'bold'
+matplotlib.rcParams['axes.titleweight'] = 'bold'
 
 class TrendChart(QWidget):
     """
@@ -29,6 +29,8 @@ class TrendChart(QWidget):
         super().__init__(parent)
         self.current_theme = "Light"
         self.last_measurements = []  # Store for replot on theme change
+        self.figure = None  # Keep reference to figure
+        self.canvas = None  # Keep reference to canvas
         self.setup_ui()
     
     def setup_ui(self):
@@ -38,7 +40,7 @@ class TrendChart(QWidget):
         self.setMaximumHeight(400)
         self.setLayout(layout)
         
-        # Will add canvas here later
+        # Canvas will be added when data arrives
         self.canvas = None
     def plot_trends(self, measurements):
         """
@@ -85,14 +87,25 @@ class TrendChart(QWidget):
             widget = self.layout().takeAt(0).widget()
             if widget:
                 widget.deleteLater()
-        self.canvas = None
         
-        # ===== ADIM 3: Create Figure =====
+        # ===== Clean up old canvas/figure to prevent "wrapped object deleted" errors =====
         if self.canvas is not None:
-            self.layout().removeWidget(self.canvas)
-            self.canvas.deleteLater()
+            try:
+                self.canvas.figure.clear()
+                plt.close(self.figure)
+            except:
+                pass
+            self.canvas = None
+        if self.figure is not None:
+            try:
+                self.figure.clear()
+                plt.close(self.figure)
+            except:
+                pass
+            self.figure = None
         
         figure = Figure(figsize=(8, 4), dpi=100)
+        self.figure = figure  # Keep reference to figure
         
         # Set colors based on current theme
         if self.current_theme == "Dark":
@@ -160,13 +173,28 @@ class TrendChart(QWidget):
 
     def show_empty_state(self):
         """Display message when not enough data for chart"""
-        # Clear previous canvas
         # Clear all widgets from layout
         while self.layout().count():
             widget = self.layout().takeAt(0).widget()
             if widget:
                 widget.deleteLater()
-        self.canvas = None
+        
+        # Clean up canvas/figure
+        if self.canvas is not None:
+            try:
+                self.canvas.figure.clear()
+                plt.close(self.figure)
+            except:
+                pass
+            self.canvas = None
+        if self.figure is not None:
+            try:
+                self.figure.clear()
+                plt.close(self.figure)
+            except:
+                pass
+            self.figure = None
+        
         # Show message
         empty_label = QLabel("Need at least 2 measurements to display chart")
         empty_label.setObjectName("chart_empty_message")
@@ -178,3 +206,18 @@ class TrendChart(QWidget):
         # Redraw chart with new theme
         if self.last_measurements:
             self.plot_trends(self.last_measurements)
+    
+    def closeEvent(self, event):
+        """Clean up matplotlib resources when widget is closed"""
+        if self.canvas is not None:
+            try:
+                self.canvas.figure.clear()
+                plt.close(self.figure)
+            except:
+                pass
+        if self.figure is not None:
+            try:
+                plt.close(self.figure)
+            except:
+                pass
+        super().closeEvent(event)

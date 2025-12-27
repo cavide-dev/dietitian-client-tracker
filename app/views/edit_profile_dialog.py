@@ -80,13 +80,21 @@ class EditProfileDialog(QDialog):
         # Validate fullname using ValidationService
         is_valid_fullname, fullname_error = ValidationService.validate_fullname(fullname)
         if not is_valid_fullname:
-            QMessageBox.warning(self, "Validation Error", fullname_error)
+            QMessageBox.warning(
+                self,
+                TranslationService.get("dialogs.error", "Validation Error"),
+                fullname_error
+            )
             return
         
         # Validate email using ValidationService
         is_valid_email, email_error = ValidationService.validate_email(email)
         if not is_valid_email:
-            QMessageBox.warning(self, "Validation Error", email_error)
+            QMessageBox.warning(
+                self,
+                TranslationService.get("dialogs.error", "Validation Error"),
+                email_error
+            )
             return
         
         try:
@@ -97,9 +105,21 @@ class EditProfileDialog(QDialog):
             )
             
             if success:
-                QMessageBox.information(self, "Success", message)
+                QMessageBox.information(
+                    self,
+                    TranslationService.get("dialogs.success", "Success"),
+                    TranslationService.get("settings.profile_updated", "Profile updated successfully!")
+                )
                 self.accept()
             else:
-                QMessageBox.critical(self, "Error", message)
+                QMessageBox.critical(
+                    self,
+                    TranslationService.get("dialogs.error", "Error"),
+                    message
+                )
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to update profile: {str(e)}")
+            QMessageBox.critical(
+                self,
+                TranslationService.get("dialogs.error", "Error"),
+                f"{TranslationService.get('dialogs.failed', 'Failed to update profile')}: {str(e)}"
+            )

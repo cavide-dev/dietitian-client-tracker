@@ -81,16 +81,28 @@ class ChangePasswordDialog(QDialog):
         
         # Validation using ValidationService
         if not current_pass:
-            QMessageBox.warning(self, "Validation Error", "Current password is required")
+            QMessageBox.warning(
+                self, 
+                TranslationService.get("dialogs.error", "Validation Error"),
+                TranslationService.get("validation.current_password_required", "Current password is required")
+            )
             return
         
         is_valid_password, password_error = ValidationService.validate_password(new_pass, min_length=6)
         if not is_valid_password:
-            QMessageBox.warning(self, "Validation Error", password_error)
+            QMessageBox.warning(
+                self,
+                TranslationService.get("dialogs.error", "Validation Error"),
+                password_error
+            )
             return
         
         if new_pass != confirm_pass:
-            QMessageBox.warning(self, "Validation Error", "Passwords do not match")
+            QMessageBox.warning(
+                self,
+                TranslationService.get("dialogs.error", "Validation Error"),
+                TranslationService.get("validation.passwords_mismatch", "Passwords do not match")
+            )
             return
         
         try:
@@ -101,9 +113,21 @@ class ChangePasswordDialog(QDialog):
             )
             
             if success:
-                QMessageBox.information(self, "Success", message)
+                QMessageBox.information(
+                    self,
+                    TranslationService.get("dialogs.success", "Success"),
+                    TranslationService.get("settings.password_changed", "Password changed successfully!")
+                )
                 self.accept()
             else:
-                QMessageBox.warning(self, "Error", message)
+                QMessageBox.warning(
+                    self,
+                    TranslationService.get("dialogs.error", "Error"),
+                    message
+                )
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to change password: {str(e)}")
+            QMessageBox.critical(
+                self,
+                TranslationService.get("dialogs.error", "Error"),
+                f"{TranslationService.get('dialogs.failed', 'Failed to change password')}: {str(e)}"
+            )
