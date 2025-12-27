@@ -131,7 +131,15 @@ class MeasurementDialog(QDialog):
         self.layout.addWidget(self.buttons)
         # If editing, populate form fields with existing measurement data
         if self.measurement_data:
-            self.input_date.setDate(self.measurement_data.get('date', QDate.currentDate()))
+            # Parse date if it's a string
+            date_val = self.measurement_data.get('date', QDate.currentDate())
+            if isinstance(date_val, str):
+                date_obj = QDate.fromString(date_val, "yyyy-MM-dd")
+                if date_obj.isValid():
+                    self.input_date.setDate(date_obj)
+            elif isinstance(date_val, QDate):
+                self.input_date.setDate(date_val)
+            
             self.input_weight.setValue(self.measurement_data.get('weight', 0))
             self.input_height.setValue(self.measurement_data.get('height', 0))
             self.input_fat.setValue(self.measurement_data.get('body_fat', 0))
