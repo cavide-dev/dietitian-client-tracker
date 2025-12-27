@@ -128,6 +128,12 @@ class MeasurementDialog(QDialog):
         self.buttons = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
         self.buttons.accepted.connect(self.accept)
         self.buttons.rejected.connect(self.reject)
+        
+        # Style cancel button as gray
+        cancel_btn = self.buttons.button(QDialogButtonBox.Cancel)
+        if cancel_btn:
+            cancel_btn.setObjectName("btn_cancel_dialog")
+        
         self.layout.addWidget(self.buttons)
         # If editing, populate form fields with existing measurement data
         if self.measurement_data:

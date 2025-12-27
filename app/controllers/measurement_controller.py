@@ -219,6 +219,12 @@ class MeasurementController:
         # Remove old chart and recreate
         if self.main.trend_chart is not None:
             tab_overview.layout().removeWidget(self.main.trend_chart)
+            # Properly clean up matplotlib resources before deletion
+            try:
+                self.main.trend_chart.show_empty_state()  # Clear the chart first
+                self.main.trend_chart.close()  # Trigger closeEvent cleanup
+            except:
+                pass
             self.main.trend_chart.deleteLater()
             self.main.trend_chart = None
             tab_overview.layout().update()
