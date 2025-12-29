@@ -845,14 +845,12 @@ class MainController(QMainWindow):
                 self.btn_backup.setText(TranslationService.get("buttons.backup", "Backup"))
             
             # ===== TABLE HEADERS =====
-            # Clients table headers
+            # Clients table headers - updated to match client_controller.load_clients_table()
             if self.tableWidget.columnCount() > 0:
                 headers = [
                     TranslationService.get("clients.full_name", "Full Name"),
                     TranslationService.get("clients.phone", "Phone"),
-                    TranslationService.get("clients.email", "Email"),
-                    TranslationService.get("clients.birth_date", "Birth Date"),
-                    TranslationService.get("tables.actions", "Actions")
+                    TranslationService.get("clients.notes", "Notes")
                 ]
                 self.tableWidget.setHorizontalHeaderLabels(headers)
             
