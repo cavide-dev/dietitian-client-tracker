@@ -42,13 +42,26 @@ class ClientController:
             query = {"dietician_username": self.main.current_user.get("username")}
         all_clients = list(clients_collection.find(query))
         
-        # Configure table
-        self.main.tableWidget.setRowCount(len(all_clients))
+        # Configure table - Complete reset
+        self.main.tableWidget.setColumnCount(0)
+        self.main.tableWidget.setRowCount(0)
+        
+        # Now set new columns
         self.main.tableWidget.setColumnCount(3)
-        self.main.tableWidget.setHorizontalHeaderLabels(["Full Name", "Phone", "Notes"])
+        
+        # Use TranslationService for headers
+        headers = [
+            TranslationService.get("clients.full_name", "Full Name"),
+            TranslationService.get("clients.phone", "Phone"),
+            TranslationService.get("clients.notes", "Notes")
+        ]
+        self.main.tableWidget.setHorizontalHeaderLabels(headers)
         self.main.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.main.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.main.tableWidget.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        
+        # Now set row count
+        self.main.tableWidget.setRowCount(len(all_clients))
 
         # Populate table
         for row_index, client in enumerate(all_clients):

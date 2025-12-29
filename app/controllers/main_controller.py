@@ -88,6 +88,10 @@ class MainController(QMainWindow):
         self.label_total_measurements.setText("Loading...")
         self.label_active_diets.setText("Loading...")
         
+        # Reset clients table completely (clear any pre-loaded columns from UI)
+        self.tableWidget.setColumnCount(0)
+        self.tableWidget.setRowCount(0)
+        
         # Load dashboard and clients table asynchronously (100ms delay)
         # This ensures MainWindow opens immediately without freezing
         QTimer.singleShot(100, self.load_dashboard)
@@ -656,6 +660,11 @@ class MainController(QMainWindow):
         # Refresh UI labels with new language
         self.refresh_ui_labels()
         
+        # Refresh clients table headers
+        if hasattr(self, 'client_controller') and self.client_controller:
+            if hasattr(self.client_controller, 'load_clients_table'):
+                self.client_controller.load_clients_table()
+        
         # Refresh diet plans page (table and dropdown)
         if hasattr(self, 'diet_controller') and self.diet_controller:
             if hasattr(self.diet_controller, 'load_client_diet_plans'):
@@ -756,6 +765,15 @@ class MainController(QMainWindow):
             # Client notes GroupBox in detail
             if hasattr(self, 'groupBox_7'):
                 self.groupBox_7.setTitle(TranslationService.get("clients.notes", "Notes"))
+            
+            # Refresh clients table headers (columns)
+            if hasattr(self, 'tableWidget'):
+                headers = [
+                    TranslationService.get("clients.full_name", "Full Name"),
+                    TranslationService.get("clients.phone", "Phone"),
+                    TranslationService.get("clients.notes", "Notes")
+                ]
+                self.tableWidget.setHorizontalHeaderLabels(headers)
             
             self.btn_back_to_list.setText(TranslationService.get("buttons.back", "Back"))
             self.btn_add_measurement.setText(TranslationService.get("measurements.add_measurement", "Add Measurement"))
