@@ -247,4 +247,4 @@ class SignupController(QMainWindow):
         self.input_password.setPlaceholderText(TranslationService.get("register.password_placeholder", "Enter your password"))
         self.input_confirm_password.setPlaceholderText(TranslationService.get("register.confirm_password_placeholder", "Confirm your password"))
         
-        print(f"✓ Signup language changed to: {lang_code}")
+        print(f" Signup language changed to: {lang_code}")

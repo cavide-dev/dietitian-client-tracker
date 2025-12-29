@@ -31,7 +31,7 @@ def migrate_add_language():
         
         # Test connection
         db.command('ping')
-        print("✓ Connected to MongoDB successfully\n")
+        print(" Connected to MongoDB successfully\n")
         
         dieticians = db['dieticians']
         
@@ -39,7 +39,7 @@ def migrate_add_language():
         users_without_lang = list(dieticians.find({"preferred_language": {"$exists": False}}))
         
         if not users_without_lang:
-            print("✓ All users already have preferred_language field")
+            print("All users already have preferred_language field")
             return
         
         print(f"Found {len(users_without_lang)} user(s) without preferred_language field")
@@ -51,8 +51,8 @@ def migrate_add_language():
             {"$set": {"preferred_language": "en"}}
         )
         
-        print(f"✓ Successfully updated {result.modified_count} user(s)")
-        print(f"✓ Migration completed!\n")
+        print(f" Successfully updated {result.modified_count} user(s)")
+        print(f" Migration completed!\n")
         
         # Show updated users
         print("Updated users:")
@@ -61,7 +61,7 @@ def migrate_add_language():
             print(f"  - {user['username']} ({user['fullname']}) - Language: {user['preferred_language']}")
         
     except Exception as e:
-        print(f"✗ Error: {e}")
+        print(f"Error: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":

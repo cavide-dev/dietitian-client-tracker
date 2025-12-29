@@ -24,12 +24,12 @@ def test_initialization():
     
     try:
         TranslationService.initialize("en", debug=True)
-        print("✓ Initialization successful")
+        print(" Initialization successful")
         print(f"  Current language: {TranslationService.get_current_language()}")
         print(f"  Available languages: {TranslationService.get_available_languages()}")
         return True
     except Exception as e:
-        print(f"✗ Initialization failed: {e}")
+        print(f" Initialization failed: {e}")
         return False
 
 
@@ -76,12 +76,12 @@ def test_key_consistency():
                     if len(details['extra_keys']) > 5:
                         print(f"    ... and {len(details['extra_keys']) - 5} more")
         else:
-            print("\n✓ All languages have consistent keys!")
+            print("\n All languages have consistent keys!")
         
         return all_consistent
     
     except Exception as e:
-        print(f"✗ Consistency check failed: {e}")
+        print(f"Consistency check failed: {e}")
         return False
 
 
@@ -110,7 +110,7 @@ def test_translation_retrieval():
         return True
     
     except Exception as e:
-        print(f"✗ Translation retrieval failed: {e}")
+        print(f" Translation retrieval failed: {e}")
         return False
 
 
@@ -126,17 +126,17 @@ def test_missing_key_handling():
         print(f"Non-existent key returned: '{value}'")
         
         if value == "DEFAULT_VALUE":
-            print("✓ Default value returned correctly")
+            print(" Default value returned correctly")
         else:
-            print("✗ Default value not returned")
+            print(" Default value not returned")
             return False
         
         # Check if missing key was logged
-        print(f"✓ Missing key logged in debug mode")
+        print(f" Missing key logged in debug mode")
         return True
     
     except Exception as e:
-        print(f"✗ Missing key handling failed: {e}")
+        print(f" Missing key handling failed: {e}")
         return False
 
 
@@ -152,19 +152,19 @@ def test_language_switching():
         for lang in TranslationService.get_available_languages():
             TranslationService.set_language(lang)
             value = TranslationService.get(test_key)
-            print(f"✓ {lang}: {value}")
+            print(f" {lang}: {value}")
         
         # Try invalid language
         try:
             TranslationService.set_language("xx")
-            print("✗ Should have raised error for invalid language")
+            print(" Should have raised error for invalid language")
             return False
         except ValueError as e:
-            print(f"✓ Invalid language error caught: {str(e)[:50]}...")
+            print(f"Invalid language error caught: {str(e)[:50]}...")
             return True
     
     except Exception as e:
-        print(f"✗ Language switching failed: {e}")
+        print(f" Language switching failed: {e}")
         return False
 
 
@@ -205,10 +205,10 @@ def main():
     print(f"\nTotal: {passed}/{total} tests passed")
     
     if passed == total:
-        print("\n✓ All tests passed! Translation system is production-ready.")
+        print("\n All tests passed! Translation system is production-ready.")
         return 0
     else:
-        print(f"\n✗ {total - passed} test(s) failed. Review output above.")
+        print(f"\n {total - passed} test(s) failed. Review output above.")
         return 1
 
 

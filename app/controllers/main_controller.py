@@ -588,13 +588,13 @@ class MainController(QMainWindow):
             if self.trend_chart is not None:
                 self.trend_chart.apply_theme(theme_name)
             
-            print(f"✓ Theme changed to: {theme_name}")
+            print(f" Theme changed to: {theme_name}")
             
         except FileNotFoundError as e:
-            print(f"✗ Error: Theme file not found - {e}")
+            print(f" Error: Theme file not found - {e}")
             print(f"  Looked for file at: {styles_dir}")
         except Exception as e:
-            print(f"✗ Error applying theme: {e}")
+            print(f" Error applying theme: {e}")
 
     def load_language_preference(self):
         """Load user's saved language preference from database, default to English"""
@@ -623,7 +623,7 @@ class MainController(QMainWindow):
             # Refresh UI labels with the loaded language
             self.refresh_ui_labels()
             
-            print(f"✓ Language preference loaded: {language}")
+            print(f" Language preference loaded: {language}")
                 
         except Exception as e:
             print(f"Error loading language preference: {e}")
@@ -649,7 +649,7 @@ class MainController(QMainWindow):
                 )
                 # Update current_user dict for consistency
                 self.current_user["preferred_language"] = language_code
-                print(f"✓ Language changed to: {language_code}")
+                print(f" Language changed to: {language_code}")
         except Exception as e:
             print(f"Error saving language preference: {e}")
         
@@ -860,7 +860,7 @@ class MainController(QMainWindow):
                 ]
                 self.table_measurements.setHorizontalHeaderLabels(headers)
             
-            print("✓ UI labels refreshed with new language")
+            print(" UI labels refreshed with new language")
             
         except Exception as e:
             print(f"Error refreshing UI labels: {e}")

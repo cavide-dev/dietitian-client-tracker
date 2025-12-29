@@ -241,7 +241,7 @@ class LoginController(QMainWindow):
         self.input_username.setPlaceholderText(TranslationService.get("login.username_placeholder", "Enter your username"))
         self.input_password.setPlaceholderText(TranslationService.get("login.password_placeholder", "Enter your password"))
         
-        print(f"✓ Login language changed to: {lang_code}")
+        print(f" Login language changed to: {lang_code}")
         
         # Show login window
         self.show()

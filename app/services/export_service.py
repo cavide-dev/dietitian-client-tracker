@@ -52,18 +52,18 @@ def _register_fonts():
             _safe_register_family("AppLatin", dv_regular, dv_bold)
             ok["latin"] = True
         else:
-            print("⚠ Missing DejaVu fonts (TR/EN): DejaVuSans.ttf, DejaVuSans-Bold.ttf")
+            print(" Missing DejaVu fonts (TR/EN): DejaVuSans.ttf, DejaVuSans-Bold.ttf")
 
         if os.path.exists(kr_regular) and os.path.exists(kr_bold):
             _safe_register_family("AppKR", kr_regular, kr_bold)
             ok["kr"] = True
         else:
-            print("⚠ Missing NotoSansKR fonts (KO): NotoSansKR-Regular.ttf, NotoSansKR-Bold.ttf")
+            print(" Missing NotoSansKR fonts (KO): NotoSansKR-Regular.ttf, NotoSansKR-Bold.ttf")
 
     except Exception as e:
-        print(f"⚠ Font registration error: {e}")
+        print(f" Font registration error: {e}")
 
-    print(f"✓ Font status: {ok}")
+    print(f" Font status: {ok}")
     return ok
 
 
