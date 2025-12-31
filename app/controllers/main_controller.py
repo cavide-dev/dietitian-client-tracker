@@ -233,8 +233,9 @@ class MainController(QMainWindow):
                 activity_text = f"✓ {client.get('full_name', 'Unknown')} - {TranslationService.get('clients.title', 'Client')} {TranslationService.get('messages.added', 'added')}"
                 self.list_recent_activity.addItem(activity_text)
             
-            # Get recent measurements (últimas 3 añadidas)
-            recent_measurements = list(self.db['measurements'].find().sort("_id", -1).limit(3))
+            # Get recent measurements (latest 3 for current user)
+            measurement_filter = user_filter.copy()
+            recent_measurements = list(self.db['measurements'].find(measurement_filter).sort("_id", -1).limit(3))
             for measurement in recent_measurements:
                 # Find client name for this measurement
                 client = self.db['clients'].find_one({"_id": measurement.get('client_id')})
@@ -242,13 +243,26 @@ class MainController(QMainWindow):
                 activity_text = f"✓ {client_name} - {TranslationService.get('measurements.title', 'Measurement')} {TranslationService.get('messages.added', 'added')}"
                 self.list_recent_activity.addItem(activity_text)
             
-            # Get recent diet plans (últimos 2 creados)
-            recent_diets = list(self.db['diet_plans'].find().sort("_id", -1).limit(2))
+            # Get recent diet plans (latest 2 for current user)
+            diet_activity_filter = user_filter.copy()
+            recent_diets = list(self.db['diet_plans'].find(diet_activity_filter).sort("_id", -1).limit(2))
+            
             for diet in recent_diets:
+                client_id = diet.get('client_id')
+                
+                # Convert string client_id to ObjectId if needed
+                from bson.objectid import ObjectId
+                if isinstance(client_id, str):
+                    try:
+                        client_id = ObjectId(client_id)
+                    except Exception:
+                        pass
+                
                 # Find client name for this diet
-                client = self.db['clients'].find_one({"_id": diet.get('client_id')})
+                client = self.db['clients'].find_one({"_id": client_id})
                 client_name = client.get('full_name', 'Unknown') if client else 'Unknown'
-                activity_text = f"✓ {client_name} - {TranslationService.get('diet_plans.title', 'Diet Plan')} {TranslationService.get('messages.created', 'created')}"
+                diet_name = diet.get('title', 'Unknown')
+                activity_text = f"✓ {client_name} - {diet_name} ({TranslationService.get('diet_plans.title', 'Diet Plan')} {TranslationService.get('messages.created', 'created')})"
                 self.list_recent_activity.addItem(activity_text)
             
             # If no activity, show message
@@ -328,7 +342,8 @@ class MainController(QMainWindow):
     def show_measurements_empty_state(self):
         """Show empty state for measurements, hide table"""
         if self.empty_state_measurements is None:
-            self.empty_state_measurements = QLabel("📊 No measurements recorded. Add your first measurement to get started.")
+            empty_text = TranslationService.get("measurements.no_measurements", "📊 No measurements recorded. Add your first measurement to get started.")
+            self.empty_state_measurements = QLabel(empty_text)
             self.empty_state_measurements.setAlignment(Qt.AlignCenter)
             self.empty_state_measurements.setObjectName("empty_state_measurements")
             # Get the parent layout and insert before table

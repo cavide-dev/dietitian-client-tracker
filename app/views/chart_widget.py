@@ -1,4 +1,5 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel
+from PyQt5.QtCore import Qt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
@@ -31,6 +32,7 @@ class TrendChart(QWidget):
         self.last_measurements = []  # Store for replot on theme change
         self.figure = None  # Keep reference to figure
         self.canvas = None  # Keep reference to canvas
+        self.is_being_destroyed = False  # Flag to prevent paint errors during destruction
         self.setup_ui()
     
     def setup_ui(self):
@@ -91,18 +93,24 @@ class TrendChart(QWidget):
         # ===== Clean up old canvas/figure to prevent "wrapped object deleted" errors =====
         if self.canvas is not None:
             try:
-                self.canvas.figure.clear()
-                plt.close(self.figure)
+                # Disconnect canvas from figure before cleanup
+                if hasattr(self.canvas, 'figure'):
+                    self.canvas.figure.clear()
+                self.canvas.deleteLater()
             except:
                 pass
             self.canvas = None
+        
         if self.figure is not None:
             try:
                 self.figure.clear()
-                plt.close(self.figure)
             except:
                 pass
             self.figure = None
+        
+        # Force garbage collection
+        import gc
+        gc.collect()
         
         figure = Figure(figsize=(8, 4), dpi=100)
         self.figure = figure  # Keep reference to figure
@@ -179,24 +187,31 @@ class TrendChart(QWidget):
             if widget:
                 widget.deleteLater()
         
-        # Clean up canvas/figure
+        # Clean up canvas/figure properly
         if self.canvas is not None:
             try:
-                self.canvas.figure.clear()
-                plt.close(self.figure)
+                if hasattr(self.canvas, 'figure'):
+                    self.canvas.figure.clear()
+                self.canvas.deleteLater()
             except:
                 pass
             self.canvas = None
+        
         if self.figure is not None:
             try:
                 self.figure.clear()
-                plt.close(self.figure)
             except:
                 pass
             self.figure = None
         
+        # Force garbage collection
+        import gc
+        gc.collect()
+        
         # Show message
-        empty_label = QLabel("Need at least 2 measurements to display chart")
+        empty_text = TranslationService.get("measurements.chart_empty", "Need at least 2 measurements to display chart")
+        empty_label = QLabel(empty_text)
+        empty_label.setAlignment(Qt.AlignCenter)
         empty_label.setObjectName("chart_empty_message")
         self.layout().addWidget(empty_label)
 
@@ -209,31 +224,42 @@ class TrendChart(QWidget):
     
     def closeEvent(self, event):
         """Clean up matplotlib resources when widget is closed"""
+        self.is_being_destroyed = True
+        
         if self.canvas is not None:
             try:
-                self.canvas.figure.clear()
-                plt.close(self.figure)
+                if hasattr(self.canvas, 'figure'):
+                    self.canvas.figure.clear()
+                self.canvas.deleteLater()
             except:
                 pass
+        
         if self.figure is not None:
             try:
-                plt.close(self.figure)
+                self.figure.clear()
             except:
                 pass
+        
         super().closeEvent(event)
     
     def __del__(self):
         """Destructor - ensure all matplotlib resources are cleaned up"""
+        if self.is_being_destroyed:
+            return
+        
+        self.is_being_destroyed = True
         try:
             if self.canvas is not None:
                 try:
-                    self.canvas.figure.clear()
-                    plt.close(self.figure)
+                    if hasattr(self.canvas, 'figure'):
+                        self.canvas.figure.clear()
+                    self.canvas.deleteLater()
                 except:
                     pass
+            
             if self.figure is not None:
                 try:
-                    plt.close(self.figure)
+                    self.figure.clear()
                 except:
                     pass
         except:

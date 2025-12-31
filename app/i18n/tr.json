@@ -111,6 +111,7 @@
     "measurement_updated": "Ölçüm başarıyla güncellendi!",
     "measurement_deleted": "Ölçüm başarıyla silindi!",
     "no_measurements": "Henüz ölçüm bulunmuyor. Yeni bir tane ekleyin.",
+    "chart_empty": "Grafik göstermek için en az 2 ölçüm gereklidir",
     "overview": "Genel Bakış",
     "history": "Geçmiş",
     "weight_muscle_axis": "Ağırlık & Kas (kg)",

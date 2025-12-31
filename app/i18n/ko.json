@@ -111,6 +111,7 @@
     "measurement_updated": "측정이 업데이트되었습니다!",
     "measurement_deleted": "측정이 삭제되었습니다!",
     "no_measurements": "측정 기록이 없습니다. 새로 추가해 주세요.",
+    "chart_empty": "차트를 표시하려면 최소 2개의 측정이 필요합니다",
     "overview": "요약",
     "history": "기록",
     "weight_muscle_axis": "체중 & 근육 (kg)",

@@ -111,6 +111,7 @@
     "measurement_updated": "Measurement updated successfully!",
     "measurement_deleted": "Measurement deleted successfully!",
     "no_measurements": "No measurements available. Add one!",
+    "chart_empty": "Need at least 2 measurements to display chart",
     "overview": "Overview",
     "history": "History",
     "weight_muscle_axis": "Weight & Muscle (kg)",

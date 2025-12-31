@@ -26,6 +26,9 @@ class SignupController(QMainWindow):
     def __init__(self, db_connection_string=None):
         super(SignupController, self).__init__()
         
+        # Initialize TranslationService with default language (English)
+        TranslationService.initialize(language="en", debug=False)
+        
         # Load UI from signup_window.ui
         ui_path = os.path.join(os.path.dirname(__file__), "..", "views", "signup_window.ui")
         loadUi(ui_path, self)
@@ -43,6 +46,9 @@ class SignupController(QMainWindow):
         
         # Setup language buttons
         self.setup_language_buttons()
+        
+        # Initialize UI labels with translations on first load
+        self.refresh_signup_ui_labels()
     
     def init_database(self, connection_string=None):
         """
@@ -228,6 +234,12 @@ class SignupController(QMainWindow):
         TranslationService.initialize(language=lang_code, debug=False)
         
         # Update all signup labels
+        self.refresh_signup_ui_labels()
+        
+        print(f" Signup language changed to: {lang_code}")
+    
+    def refresh_signup_ui_labels(self):
+        """Refresh all signup UI labels with current language"""
         self.label_title.setText(TranslationService.get("register.title", "Create Account"))
         self.label_subtitle.setText(TranslationService.get("register.subtitle", "Join Our Platform"))
         self.label_fullname.setText(TranslationService.get("register.fullname", "Full Name") + ":")
@@ -246,5 +258,3 @@ class SignupController(QMainWindow):
         self.input_email.setPlaceholderText(TranslationService.get("register.email_placeholder", "Enter your email"))
         self.input_password.setPlaceholderText(TranslationService.get("register.password_placeholder", "Enter your password"))
         self.input_confirm_password.setPlaceholderText(TranslationService.get("register.confirm_password_placeholder", "Confirm your password"))
-        
-        print(f" Signup language changed to: {lang_code}")

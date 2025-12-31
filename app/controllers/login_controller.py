@@ -27,6 +27,9 @@ class LoginController(QMainWindow):
     def __init__(self, db_connection_string=None):
         super(LoginController, self).__init__()
         
+        # Initialize TranslationService with default language (English)
+        TranslationService.initialize(language="en", debug=False)
+        
         # Load UI from login_window.ui
         # UI files are in app/views/ directory, so we go up one level (..)
         ui_path = os.path.join(os.path.dirname(__file__), "..", "views", "login_window.ui")
@@ -54,6 +57,9 @@ class LoginController(QMainWindow):
         
         # Setup language buttons
         self.setup_language_buttons()
+        
+        # Initialize UI labels with translations on first load
+        self.refresh_login_ui_labels()
         
     def init_database(self, connection_string=None):
         """
@@ -228,6 +234,15 @@ class LoginController(QMainWindow):
         TranslationService.initialize(language=lang_code, debug=False)
         
         # Update all login labels
+        self.refresh_login_ui_labels()
+        
+        print(f" Login language changed to: {lang_code}")
+        
+        # Show login window
+        self.show()
+    
+    def refresh_login_ui_labels(self):
+        """Refresh all login UI labels with current language"""
         self.label_title.setText(TranslationService.get("login.title", "Welcome Back!"))
         self.label_subtitle.setText(TranslationService.get("login.subtitle", "Sign in to your account"))
         self.label_username.setText(TranslationService.get("login.username", "Username") + ":")
@@ -240,8 +255,3 @@ class LoginController(QMainWindow):
         # Update placeholder texts
         self.input_username.setPlaceholderText(TranslationService.get("login.username_placeholder", "Enter your username"))
         self.input_password.setPlaceholderText(TranslationService.get("login.password_placeholder", "Enter your password"))
-        
-        print(f" Login language changed to: {lang_code}")
-        
-        # Show login window
-        self.show()

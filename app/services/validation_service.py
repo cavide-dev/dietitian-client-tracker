@@ -50,7 +50,10 @@ class ValidationService:
         if not phone:
             return False, T("validation.phone_empty", "Phone number cannot be empty")
         
-        if not ValidationService.PHONE_PATTERN.match(phone):
+        # Remove all spaces, dashes, and parentheses for validation
+        phone_digits = re.sub(r'[\s\-\(\)]', '', phone)
+        
+        if not ValidationService.PHONE_PATTERN.match(phone_digits):
             return False, T("validation.phone_invalid", "Phone number must be 7-15 digits", min=7, max=15)
         
         return True, ""

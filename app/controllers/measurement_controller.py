@@ -104,7 +104,16 @@ class MeasurementController:
                 "height": data.get('height', 0),
                 "body_fat_ratio": data.get('body_fat_ratio', 0),
                 "muscle_mass": data.get('muscle_mass', 0),
-                "circumferences": data.get('circumferences', {}),
+                "metabolic_age": data.get('metabolic_age', 0),
+                "bmr": data.get('bmr', 0),
+                "visceral_fat": data.get('visceral_fat', 0),
+                "water_ratio": data.get('water_ratio', 0),
+                "waist": data.get('waist', 0),
+                "hip": data.get('hip', 0),
+                "chest": data.get('chest', 0),
+                "arm": data.get('arm', 0),
+                "thigh": data.get('thigh', 0),
+                "notes": data.get('notes', ''),
                 "dietician_username": self.main.current_user.get("username") if self.main.current_user else None
             }
 
@@ -222,13 +231,22 @@ class MeasurementController:
             # Properly clean up matplotlib resources before deletion
             try:
                 self.main.trend_chart.show_empty_state()  # Clear the chart first
+            except:
+                pass
+            try:
                 self.main.trend_chart.close()  # Trigger closeEvent cleanup
             except:
                 pass
-            self.main.trend_chart.deleteLater()
+            try:
+                self.main.trend_chart.deleteLater()
+            except:
+                pass
+            
             # Process pending events to ensure cleanup happens
             from PyQt5.QtWidgets import QApplication
+            from PyQt5.QtCore import Qt
             QApplication.processEvents()
+            
             self.main.trend_chart = None
             tab_overview.layout().update()
         
@@ -250,6 +268,12 @@ class MeasurementController:
         dialog = MeasurementDialog(self.main)
         
         if dialog.exec_():
+            # Validate before saving
+            is_valid, error_msg = dialog.validate_measurements()
+            if not is_valid:
+                QMessageBox.warning(self.main, TranslationService.get("common.error", "Validation Error"), error_msg)
+                return
+            
             data = dialog.get_data()
             if self.add_measurement_entry(self.main.current_client_id, data):
                 QMessageBox.information(self.main, TranslationService.get("dialogs.success", "Success"), TranslationService.get("measurements.measurement_added", "Measurement added successfully!"))
@@ -271,6 +295,12 @@ class MeasurementController:
             dialog = MeasurementDialog(self.main, measurement_data=measurement)
             
             if dialog.exec_():
+                # Validate before saving
+                is_valid, error_msg = dialog.validate_measurements()
+                if not is_valid:
+                    QMessageBox.warning(self.main, TranslationService.get("common.error", "Validation Error"), error_msg)
+                    return
+                
                 data = dialog.get_data()
                 try:
                     self.main.db['measurements'].update_one(

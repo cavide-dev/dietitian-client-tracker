@@ -148,8 +148,8 @@ class MeasurementDialog(QDialog):
             
             self.input_weight.setValue(self.measurement_data.get('weight', 0))
             self.input_height.setValue(self.measurement_data.get('height', 0))
-            self.input_fat.setValue(self.measurement_data.get('body_fat', 0))
-            self.input_muscle.setValue(self.measurement_data.get('muscle', 0))
+            self.input_fat.setValue(self.measurement_data.get('body_fat_ratio', 0))
+            self.input_muscle.setValue(self.measurement_data.get('muscle_mass', 0))
             self.input_metabolic_age.setValue(self.measurement_data.get('metabolic_age', 0))
             self.input_bmr.setValue(self.measurement_data.get('bmr', 0))
             self.input_visceral.setValue(self.measurement_data.get('visceral_fat', 0))
