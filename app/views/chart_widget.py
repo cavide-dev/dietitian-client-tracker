@@ -1,24 +1,10 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel
 from PyQt5.QtCore import Qt
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
-import matplotlib
 from datetime import datetime
 from app.i18n.translations import TranslationService
 
-# Set font for Unicode support (Korean, Turkish, etc.)
-# Arial and DejaVu support Turkish + Latin, then fallback to CJK fonts
-matplotlib.rcParams['font.sans-serif'] = [
-    'Arial',           # Supports Turkish + Latin + many Unicode
-    'Verdana',         # Alternative with good Turkish support
-    'DejaVu Sans',     # Unicode support
-    'SimSun',          # CJK support
-    'NotoSansCJK'      # CJK support
-]
-matplotlib.rcParams['font.weight'] = 'bold'
-matplotlib.rcParams['axes.labelweight'] = 'bold'
-matplotlib.rcParams['axes.titleweight'] = 'bold'
+# Matplotlib will be imported lazily in plot_trends() method
+# to avoid issues with Qt5Agg backend initialization
 
 class TrendChart(QWidget):
     """
@@ -51,6 +37,28 @@ class TrendChart(QWidget):
         Args:
             measurements (list): List of measurement documents from MongoDB
         """
+        # Lazy import matplotlib only when plotting is needed
+        try:
+            from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+            from matplotlib.figure import Figure
+            import matplotlib.pyplot as plt
+            import matplotlib
+            
+            # Set font for Unicode support (Korean, Turkish, etc.)
+            matplotlib.rcParams['font.sans-serif'] = [
+                'Arial',           # Supports Turkish + Latin + many Unicode
+                'Verdana',         # Alternative with good Turkish support
+                'DejaVu Sans',     # Unicode support
+                'SimSun',          # CJK support
+                'NotoSansCJK'      # CJK support
+            ]
+            matplotlib.rcParams['font.weight'] = 'bold'
+            matplotlib.rcParams['axes.labelweight'] = 'bold'
+            matplotlib.rcParams['axes.titleweight'] = 'bold'
+        except Exception as e:
+            # Matplotlib failed to load, show empty state
+            self.show_empty_state()
+            return
         
         # Store measurements for replot on theme change
         self.last_measurements = measurements

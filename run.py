@@ -20,9 +20,12 @@ def main():
     # - LoginController (login window)
     # - MainController (main application)
     # ====================================================
-    with open("assets/styles/light_theme.qss", "r", encoding="utf-8") as qss_file:
-        qss = qss_file.read()
-    app.setStyleSheet(qss)
+    try:
+        with open("assets/styles/light_theme.qss", "r", encoding="utf-8") as qss_file:
+            qss = qss_file.read()
+        app.setStyleSheet(qss)
+    except FileNotFoundError:
+        print("Tema dosyası bulunamadı, varsayılan tema ile devam ediliyor.")
     
     # 3. Create and Show LoginController
     # ====================================================
@@ -42,21 +45,26 @@ def main():
         Called when user successfully logs in
         user_data = {"username": "admin", "email": "...", ...}
         """
-        # Create main window and pass user data
-        main_window = MainController(user_data)
-        main_window.resize(1200, 700)
-        main_window.show()
-        
-        # Hide login window after successful login
-        login_window.hide()
-        
-        # When logout happens, show login window again
-        def on_logout():
-            login_window.show()
-            login_window.input_username.setText("")
-            login_window.input_password.setText("")
-        
-        main_window.logout_signal.connect(on_logout)
+        try:
+            # Create main window and pass user data
+            main_window = MainController(user_data)
+            main_window.resize(1200, 700)
+            main_window.show()
+            
+            # Hide login window after successful login
+            login_window.hide()
+            
+            # When logout happens, show login window again
+            def on_logout():
+                login_window.show()
+                login_window.input_username.setText("")
+                login_window.input_password.setText("")
+            
+            main_window.logout_signal.connect(on_logout)
+            
+        except Exception as e:
+            from PyQt5.QtWidgets import QMessageBox
+            QMessageBox.critical(None, "Error", f"Failed to open main window:\n{e}")
     
     # Connect the signal
     login_window.login_successful.connect(on_login_success)
