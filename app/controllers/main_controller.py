@@ -366,14 +366,19 @@ class MainController(QMainWindow):
         Triggered when the user selects a name from the dropdown.
         Updates the global 'current_client_id' variable used for saving.
         """
-        # Retrieve the hidden ID from the selected item
-        client_id = self.cmb_client_select.currentData()
+        # Retrieve the hidden ID from the selected item (comes as string from combobox)
+        client_id_str = self.cmb_client_select.currentData()
         
-        if client_id:
-            self.current_client_id = client_id
-            print(f"Active Client Changed to: {self.current_client_id}")
-            self.hide_diet_empty_state()  # Hide the empty state first
-            self.diet_controller.load_client_diet_plans() # Then load table data
+        if client_id_str:
+            # Convert string to ObjectId for database queries
+            try:
+                self.current_client_id = ObjectId(client_id_str)
+                self.hide_diet_empty_state()  # Hide the empty state first
+                self.diet_controller.load_client_diet_plans() # Then load table data
+            except Exception as e:
+                print(f"ERROR: Invalid client ID format: {e}")
+                self.current_client_id = None
+                self.show_diet_empty_state()
         else:
             # If "Select Client..." is chosen, reset the ID
             self.current_client_id = None
@@ -397,6 +402,9 @@ class MainController(QMainWindow):
                 self.diet_controller.load_client_dropdown()
             if self.current_client_id and hasattr(self.diet_controller, 'load_client_diet_plans'):
                 self.diet_controller.load_client_diet_plans()
+            else:
+                # Show empty state only if no client is selected
+                self.show_diet_empty_state()
         
         # 3. Reset the Sub-Stacked Widget to the List/Table View (Page 0)
         # This fixes the issue of getting stuck on the 'Add Diet' form 
@@ -404,9 +412,7 @@ class MainController(QMainWindow):
         try:
             self.stack_diet_sub.setCurrentIndex(0)
         except Exception as e:
-            print(f"Error resetting diet sub-stack: {e}")
-        
-        self.show_diet_empty_state()  # Show empty state on page entry    
+            print(f"Error resetting diet sub-stack: {e}")    
 
 
     def init_ui_logic(self):
