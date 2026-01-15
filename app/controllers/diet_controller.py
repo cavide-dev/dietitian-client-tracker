@@ -196,6 +196,9 @@ class DietController:
                 return
 
             self.main.hide_diet_empty_state()
+            
+            # Ensure table has correct number of columns
+            self.main.table_diet_history.setColumnCount(3)
             self.main.table_diet_history.setRowCount(len(diets))
 
             for row_index, diet in enumerate(diets):
@@ -231,6 +234,8 @@ class DietController:
 
         except Exception as e:
             print(f"Error loading diet plans: {e}")
+            import traceback
+            traceback.print_exc()
             self.main.show_diet_empty_state()
 
     def clear_diet_inputs(self):
