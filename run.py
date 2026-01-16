@@ -1,4 +1,5 @@
 import sys
+
 from PyQt5.QtWidgets import QApplication
 from app.controllers.login_controller import LoginController
 from app.controllers.main_controller import MainController

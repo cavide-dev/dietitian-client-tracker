@@ -4,7 +4,7 @@ from datetime import datetime
 from app.i18n.translations import TranslationService
 
 # Matplotlib will be imported lazily in plot_trends() method
-# to avoid issues with Qt5Agg backend initialization
+# to avoid issues with Agg backend initialization
 
 class TrendChart(QWidget):
     """
@@ -39,18 +39,21 @@ class TrendChart(QWidget):
         """
         # Lazy import matplotlib only when plotting is needed
         try:
-            from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+            # Use Agg backend instead of Qt5Agg (more stable on Windows)
+            import matplotlib
+            matplotlib.use('Agg')
+            
             from matplotlib.figure import Figure
             import matplotlib.pyplot as plt
-            import matplotlib
             
             # Set font for Unicode support (Korean, Turkish, etc.)
+            # Windows fonts: Malgun Gothic for Korean, Arial for Turkish/Latin
             matplotlib.rcParams['font.sans-serif'] = [
-                'Arial',           # Supports Turkish + Latin + many Unicode
-                'Verdana',         # Alternative with good Turkish support
-                'DejaVu Sans',     # Unicode support
-                'SimSun',          # CJK support
-                'NotoSansCJK'      # CJK support
+                'Malgun Gothic',   # Windows Korean support (default in Win 10+)
+                'NotoSansCJK',     # Fallback for CJK support
+                'Arial',           # Turkish + Latin
+                'Verdana',         # Alternative
+                'DejaVu Sans'      # Unicode fallback
             ]
             matplotlib.rcParams['font.weight'] = 'bold'
             matplotlib.rcParams['axes.labelweight'] = 'bold'
@@ -120,6 +123,9 @@ class TrendChart(QWidget):
         import gc
         gc.collect()
         
+        from PyQt5.QtGui import QPixmap
+        from io import BytesIO
+        
         figure = Figure(figsize=(8, 4), dpi=100)
         self.figure = figure  # Keep reference to figure
         
@@ -183,9 +189,26 @@ class TrendChart(QWidget):
         lines2, labels2 = ax2.get_legend_handles_labels()
         ax1.legend(lines1 + lines2, labels1 + labels2, loc='upper left')
         
-        # ===== Embed in PyQt5 =====
-        self.canvas = FigureCanvas(figure)
-        self.layout().insertWidget(0, self.canvas)
+        # ===== Render to PNG buffer (Agg backend) =====
+        buf = BytesIO()
+        figure.savefig(buf, format='png', bbox_inches='tight')
+        buf.seek(0)
+        
+        # ===== Convert PNG to QPixmap and display =====
+        pixmap = QPixmap()
+        pixmap.loadFromData(buf.getvalue())
+        
+        # Create label to display the image
+        if self.canvas is None:
+            self.canvas = QLabel()
+            self.canvas.setAlignment(Qt.AlignCenter)
+            self.canvas.setScaledContents(True)  # Scale pixmap to fit label
+            from PyQt5.QtWidgets import QSizePolicy
+            self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+            self.layout().insertWidget(0, self.canvas)
+        
+        self.canvas.setPixmap(pixmap)
+        buf.close()
 
     def show_empty_state(self):
         """Display message when not enough data for chart"""
